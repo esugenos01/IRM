@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini-jeu Radiologie — Enseignement Scientifique</title>
+  <title>Mini-jeu Radiologie — ES</title>
   <style>
     :root {
       --bg:#0f1724;
@@ -26,14 +26,10 @@
       display:grid;
       grid-template-columns:260px 1fr 360px;
     }
-
-    /* LEFT panel */
     .left {
       padding:24px;
       border-right:1px solid rgba(255,255,255,0.03);
-      display:flex;
-      flex-direction:column;
-      gap:16px;
+      display:flex; flex-direction:column; gap:16px;
       background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent);
     }
     .left h2 { margin:0; font-size:18px; color:var(--accent); }
@@ -52,97 +48,100 @@
     .btn:active { transform: translateY(-1px); }
     .btn.locked { opacity:.45; cursor:not-allowed; transform:none; }
 
-    /* CENTER panel (patient + animations) */
     .center {
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      padding:24px;
+      display:flex; align-items:center; justify-content:center;
+      position:relative; padding:24px;
     }
     .stage {
-      width:420px;
-      height:420px;
+      width:420px; height:420px;
       background:linear-gradient(180deg,#081728 0%, #041225 100%);
       border-radius:12px;
       border:1px solid rgba(255,255,255,0.03);
-      display:grid;
-      place-items:center;
-      position:relative;
-      overflow:hidden;
-    }
-    /* Tube IRM */
-    .tube {
-      position:absolute;
-      width:300px;
-      height:300px;
-      border:8px solid rgba(110,231,183,0.3);
-      border-radius:150px / 60px;
-      top:50%; left:50%;
-      transform: translate(-50%,-50%) scaleY(0.2);
-      opacity:0;
-    }
-    .tube.open { animation: tubeOpenAnim .8s ease forwards; }
-    @keyframes tubeOpenAnim {
-      0% { transform: translate(-50%,-50%) scaleY(0.2); opacity:0; }
-      50% { transform: translate(-50%,-50%) scaleY(1.0); opacity:.6; }
-      100% { transform: translate(-50%,-50%) scaleY(1.0); opacity:1; }
+      display:grid; place-items:center;
+      position:relative; overflow:hidden;
     }
 
-    /* Patient */
+    /* Tube + animation patient dans le tube */
+    .tube {
+      position:absolute;
+      width:260px; height:260px;
+      border:12px solid rgba(110,231,183,0.3);
+      border-radius:130px / 40px;
+      top:50%; left:50%;
+      transform: translate(-50%,-50%) scaleY(0.2) scaleX(0.8);
+      opacity:0;
+      transition: opacity .5s ease;
+    }
+    .tube.open {
+      animation: tubeOpenAnim 0.8s ease forwards;
+    }
+    @keyframes tubeOpenAnim {
+      0% { transform: translate(-50%,-50%) scaleY(0.2) scaleX(0.8); opacity:0; }
+      50% { transform: translate(-50%,-50%) scaleY(1) scaleX(1); opacity:0.7; }
+      100% { transform: translate(-50%,-50%) scaleY(1) scaleX(1); opacity:1; }
+    }
+    .tube.close {
+      animation: tubeCloseAnim 0.6s ease forwards;
+    }
+    @keyframes tubeCloseAnim {
+      0% { opacity:1; }
+      100% { transform: translate(-50%,-50%) scaleY(0) scaleX(0.8); opacity:0; }
+    }
+
     .patient {
-      width:160px; height:260px;
+      width:140px; height:240px;
       display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
       gap:6px; transform-origin:center;
+      transition: transform .6s ease, opacity .6s ease;
     }
     .head {
-      width:70px; height:70px; border-radius:50%; background:#ffe6d6;
-      border:4px solid rgba(0,0,0,0.12); display:flex; align-items:center; justify-content:center;
+      width:60px; height:60px; border-radius:50%; background:#ffe6d6;
+      border:4px solid rgba(0,0,0,0.12);
+      display:flex; align-items:center; justify-content:center;
     }
     .eye {
-      width:8px; height:8px; background:#4b5563; border-radius:50%; margin:0 8px;
+      width:8px; height:8px; background:#4b5563; border-radius:50%; margin:0 6px;
     }
     .body {
-      width:90px; height:140px;
+      width:80px; height:120px;
       background:linear-gradient(180deg,#ffe6d6,#ffd9c0);
       border-radius:12px;
       display:flex; align-items:center; justify-content:center;
       position:relative;
     }
-    .heartbeat {
-      position:absolute; top:-14px; right:-10px; font-size:12px; color:var(--muted);
-    }
 
-    /* Medecins / opération animation */
+    /* médecins vus du dessus */
     .doctor {
       position:absolute;
-      width:60px; height:140px;
+      width:50px; height:90px;
       background:#fff;
       border-radius:8px;
       opacity:0;
       display:flex; align-items:center; justify-content:center;
       font-size:10px; color:#333;
+      transform-origin:center;
     }
-    .doctor.left { left:10%; top: 30%; transform: scale(0.8); }
-    .doctor.right { right:10%; top: 30%; transform: scale(0.8); }
+    .doctor:nth-child(1) { left:12%; top:28%; transform: scale(0.7); }
+    .doctor:nth-child(2) { right:12%; top:28%; transform: scale(0.7); }
+    .doctor:nth-child(3) { left:22%; bottom:20%; transform: scale(0.7); }
+    .doctor:nth-child(4) { right:22%; bottom:20%; transform: scale(0.7); }
+
     .doctor.animate {
-      animation: doctorInOut 1.2s ease forwards;
+      animation: docAnim 1.4s ease forwards;
     }
-    @keyframes doctorInOut {
+    @keyframes docAnim {
       0% { opacity:0; transform: translateY(-30px) scale(0.5); }
       20% { opacity:1; transform: translateY(0px) scale(1); }
       80% { opacity:1; transform: translateY(0px) scale(1); }
       100% { opacity:0; transform: translateY(-30px) scale(0.5); }
     }
 
-    /* Animations simples */
     @keyframes patientShake {
       0% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+      50% { transform: translateY(-6px); }
       100% { transform: translateY(0); }
     }
 
-    /* Right info panel */
     .right {
       padding:24px;
       border-left:1px solid rgba(255,255,255,0.03);
@@ -151,12 +150,9 @@
     .right h3 { margin-top:4px; color:var(--accent); }
     .info {
       background:rgba(255,255,255,0.02);
-      padding:14px;
-      border-radius:10px;
-      min-height:140px;
+      padding:14px; border-radius:10px; min-height:140px;
     }
 
-    /* overlay modals */
     .overlay {
       position:fixed; inset:0;
       display:grid; place-items:center;
@@ -173,21 +169,13 @@
     .modal p { color:var(--muted); margin:8px 0 16px; }
     .primary {
       background:linear-gradient(90deg, var(--accent), #9be6d1);
-      color:#052018;
-      padding:10px 14px;
-      border-radius:10px;
-      border:none;
-      cursor:pointer;
-      font-weight:700;
+      color:#052018; padding:10px 14px; border-radius:10px; border:none; cursor:pointer; font-weight:700;
     }
     .secondary {
-      background:transparent;
-      border:1px solid rgba(255,255,255,0.06);
-      padding:8px 12px; border-radius:8px;
-      color:var(--muted); cursor:pointer;
+      background:transparent; border:1px solid rgba(255,255,255,0.06);
+      padding:8px 12px; border-radius:8px; color:var(--muted); cursor:pointer;
     }
 
-    /* small screens */
     @media (max-width:980px){
       .container { grid-template-columns:1fr; grid-template-rows:auto auto auto; }
       .left, .right { order:2; }
@@ -216,8 +204,10 @@
             <div class="head"><div style="display:flex;align-items:center;justify-content:center"><div class="eye"></div><div class="eye"></div></div></div>
             <div class="body"><div style="text-align:center;color:#0b1720;font-weight:700">Patient</div></div>
           </div>
-          <div class="doctor left" id="docL">Dr.</div>
-          <div class="doctor right" id="docR">Dr.</div>
+          <div class="doctor" id="doc1">Dr.</div>
+          <div class="doctor" id="doc2">Dr.</div>
+          <div class="doctor" id="doc3">Dr.</div>
+          <div class="doctor" id="doc4">Dr.</div>
         </div>
       </div>
 
@@ -230,7 +220,6 @@
     </div>
   </div>
 
-  <!-- Overlay d’intro -->
   <div class="overlay" id="intro">
     <div class="modal">
       <h1>Bienvenue</h1>
@@ -242,7 +231,6 @@
     </div>
   </div>
 
-  <!-- Overlay de fin -->
   <div class="overlay" id="finish" style="display:none; z-index:90;">
     <div class="modal">
       <h1>Patient sauvé ! 🎉</h1>
@@ -262,8 +250,8 @@
     const info = document.getElementById('info');
     const patient = document.getElementById('patient');
     const tube = document.getElementById('tube');
-    const docL = document.getElementById('docL');
-    const docR = document.getElementById('docR');
+    const docs = [document.getElementById('doc1'), document.getElementById('doc2'),
+                  document.getElementById('doc3'), document.getElementById('doc4')];
     const finish = document.getElementById('finish');
 
     const texts = {
@@ -302,62 +290,58 @@
 
     function playCurative(){
       // médecins apparaissent
-      docL.classList.remove('animate');
-      docR.classList.remove('animate');
-      void docL.offsetWidth;
-      void docR.offsetWidth;
-      docL.classList.add('animate');
-      docR.classList.add('animate');
-
-      // patient réaction
+      docs.forEach(doc => {
+        doc.classList.remove('animate');
+        void doc.offsetWidth;
+        doc.classList.add('animate');
+      });
+      // patient léger tremblement
       patient.style.animation = 'patientShake .8s ease';
       patient.addEventListener('animationend', ()=>{ patient.style.animation = ''; }, { once:true });
     }
 
     function playPreventive(){
-      // médecins apparaissent (identique)
-      docL.classList.remove('animate');
-      docR.classList.remove('animate');
-      void docL.offsetWidth;
-      void docR.offsetWidth;
-      docL.classList.add('animate');
-      docR.classList.add('animate');
-
-      // patient réaction
+      docs.forEach(doc => {
+        doc.classList.remove('animate');
+        void doc.offsetWidth;
+        doc.classList.add('animate');
+      });
       patient.style.animation = 'patientShake .8s ease';
       patient.addEventListener('animationend', ()=>{ patient.style.animation = ''; }, { once:true });
     }
 
     function playIrm(){
-      // tube animation + patient entre
-      tube.classList.remove('open');
+      // tube ouvre
+      tube.classList.remove('close');
       void tube.offsetWidth;
       tube.classList.add('open');
 
-      // patient shrink move
-      patient.style.transition = 'transform .8s ease, opacity .8s ease';
-      patient.style.transform = 'translateY(80px) scale(0.6)';
+      // patient “entre” dans le tube
+      patient.style.transform = 'translateY(60px) scale(0.5)';
       patient.style.opacity = '0.4';
 
-      setTimeout(()=>{
+      setTimeout(() => {
+        // tube se ferme / disparaît
+        tube.classList.remove('open');
+        tube.classList.add('close');
+        // patient revient normal
         patient.style.transform = '';
         patient.style.opacity = '';
-      }, 1000);
-
+      }, 1200);
     }
 
     function checkIfFinished(){
-      if (used.size >= 3){
+      if (used.size >= 3) {
         setTimeout(()=>{ finish.style.display='grid'; }, 1000);
       }
     }
 
-    btn1.addEventListener('click', ()=> play('curative'));
-    btn2.addEventListener('click', ()=> play('preventive'));
-    btn3.addEventListener('click', ()=> play('irm'));
+    btn1.addEventListener('click', ()=>play('curative'));
+    btn2.addEventListener('click', ()=>play('preventive'));
+    btn3.addEventListener('click', ()=>play('irm'));
 
     document.getElementById('start').addEventListener('click', ()=>{
-      intro.style.display = 'none';
+      intro.style.display='none';
       mainApp.setAttribute('aria-hidden','false');
     });
     document.getElementById('explain').addEventListener('click', ()=>{
@@ -365,13 +349,12 @@
     });
     document.getElementById('restart').addEventListener('click', ()=>{
       used.clear();
-      finish.style.display = 'none';
+      finish.style.display='none';
       info.innerHTML = `<p>Testez à nouveau les 3 méthodes.</p>`;
     });
 
-    // Accessibilité clavier
     [btn1,btn2,btn3].forEach(b => {
-      b.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') b.click(); });
+      b.addEventListener('keydown', e=>{ if (e.key==='Enter' || e.key===' ') b.click(); });
     });
 
   </script>
