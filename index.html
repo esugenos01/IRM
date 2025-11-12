@@ -5,69 +5,196 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Mini-jeu Radiologie — Enseignement Scientifique</title>
   <style>
-    :root{
-      --bg:#0f1724; --card:#0b1220; --accent:#6ee7b7; --muted:#94a3b8; --glass: rgba(255,255,255,0.04);
-      --success:#10b981; --danger:#ef4444;
+    :root {
+      --bg:#0f1724;
+      --card:#0b1220;
+      --accent:#6ee7b7;
+      --muted:#94a3b8;
+      --glass: rgba(255,255,255,0.04);
+      --success:#10b981;
+      --danger:#ef4444;
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071126 0%, #07172a 100%);color:#e6eef8}
-    .app{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}
-    .container{width:100%;max-width:1100px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;box-shadow:0 8px 30px rgba(2,6,23,0.6);overflow:hidden;display:grid;grid-template-columns:260px 1fr 360px}
+    * { box-sizing: border-box; }
+    html, body { height:100%; margin:0; background: var(--bg); color:#e6eef8; }
+    .app { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:32px; }
+    .container {
+      width:100%; max-width:1100px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px; box-shadow:0 8px 30px rgba(2,6,23,0.6);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns:260px 1fr 360px;
+    }
 
-    /* LEFT: controls */
-    .left{padding:24px;border-right:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:16px;background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent)}
-    .left h2{margin:0;font-size:18px;color:var(--accent)}
-    .btn{background:var(--glass);border:1px solid rgba(255,255,255,0.04);padding:12px 14px;border-radius:10px;cursor:pointer;font-weight:600;color:var(--accent);display:flex;gap:10px;align-items:center;transition:transform .13s ease, background .18s}
-    .btn:hover{transform:translateY(-4px)}
-    .btn:active{transform:translateY(-1px)}
-    .btn.locked{opacity:.45;cursor:not-allowed;transform:none}
+    /* LEFT panel */
+    .left {
+      padding:24px;
+      border-right:1px solid rgba(255,255,255,0.03);
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent);
+    }
+    .left h2 { margin:0; font-size:18px; color:var(--accent); }
+    .btn {
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,0.04);
+      padding:12px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      color:var(--accent);
+      display:flex; align-items:center; gap:8px;
+      transition: transform .13s ease, background .18s;
+    }
+    .btn:hover { transform: translateY(-4px); }
+    .btn:active { transform: translateY(-1px); }
+    .btn.locked { opacity:.45; cursor:not-allowed; transform:none; }
 
-    /* CENTER: character */
-    .center{display:flex;align-items:center;justify-content:center;position:relative;padding:24px}
-    .stage{width:420px;height:420px;background:linear-gradient(180deg,#081728 0%, #041225 100%);border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:grid;place-items:center;position:relative;overflow:hidden}
-    .patient{width:160px;height:260px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;transform-origin:center}
-    .head{width:70px;height:70px;border-radius:50%;background:#ffe6d6;border:4px solid rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center}
-    .eye{width:8px;height:8px;background:#4b5563;border-radius:50%;margin:0 8px}
-    .body{width:90px;height:140px;background:linear-gradient(180deg,#ffe6d6,#ffd9c0);border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative}
-    .heartbeat{position:absolute;top:-14px;right:-10px;font-size:12px;color:var(--muted)}
+    /* CENTER panel (patient + animations) */
+    .center {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      padding:24px;
+    }
+    .stage {
+      width:420px;
+      height:420px;
+      background:linear-gradient(180deg,#081728 0%, #041225 100%);
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.03);
+      display:grid;
+      place-items:center;
+      position:relative;
+      overflow:hidden;
+    }
+    /* Tube IRM */
+    .tube {
+      position:absolute;
+      width:300px;
+      height:300px;
+      border:8px solid rgba(110,231,183,0.3);
+      border-radius:150px / 60px;
+      top:50%; left:50%;
+      transform: translate(-50%,-50%) scaleY(0.2);
+      opacity:0;
+    }
+    .tube.open { animation: tubeOpenAnim .8s ease forwards; }
+    @keyframes tubeOpenAnim {
+      0% { transform: translate(-50%,-50%) scaleY(0.2); opacity:0; }
+      50% { transform: translate(-50%,-50%) scaleY(1.0); opacity:.6; }
+      100% { transform: translate(-50%,-50%) scaleY(1.0); opacity:1; }
+    }
 
-    /* right: info panel */
-    .right{padding:24px;border-left:1px solid rgba(255,255,255,0.03);background:linear-gradient(90deg, transparent, rgba(255,255,255,0.01));}
-    .right h3{margin-top:4px;color:var(--accent)}
-    .info{background:rgba(255,255,255,0.02);padding:14px;border-radius:10px;min-height:120px}
+    /* Patient */
+    .patient {
+      width:160px; height:260px;
+      display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+      gap:6px; transform-origin:center;
+    }
+    .head {
+      width:70px; height:70px; border-radius:50%; background:#ffe6d6;
+      border:4px solid rgba(0,0,0,0.12); display:flex; align-items:center; justify-content:center;
+    }
+    .eye {
+      width:8px; height:8px; background:#4b5563; border-radius:50%; margin:0 8px;
+    }
+    .body {
+      width:90px; height:140px;
+      background:linear-gradient(180deg,#ffe6d6,#ffd9c0);
+      border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      position:relative;
+    }
+    .heartbeat {
+      position:absolute; top:-14px; right:-10px; font-size:12px; color:var(--muted);
+    }
 
-    /* animations */
-    .scalpel{position:absolute;width:120px;height:12px;right:20%;top:20%;transform-origin:left center;opacity:0}
-    .scalpel .blade{height:100%;border-radius:6px;background:linear-gradient(90deg,#cbd5e1,#e2e8f0);box-shadow:0 4px 12px rgba(0,0,0,0.5)}
+    /* Medecins / opération animation */
+    .doctor {
+      position:absolute;
+      width:60px; height:140px;
+      background:#fff;
+      border-radius:8px;
+      opacity:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:10px; color:#333;
+    }
+    .doctor.left { left:10%; top: 30%; transform: scale(0.8); }
+    .doctor.right { right:10%; top: 30%; transform: scale(0.8); }
+    .doctor.animate {
+      animation: doctorInOut 1.2s ease forwards;
+    }
+    @keyframes doctorInOut {
+      0% { opacity:0; transform: translateY(-30px) scale(0.5); }
+      20% { opacity:1; transform: translateY(0px) scale(1); }
+      80% { opacity:1; transform: translateY(0px) scale(1); }
+      100% { opacity:0; transform: translateY(-30px) scale(0.5); }
+    }
 
-    .shield{position:absolute;left:8%;bottom:22%;width:140px;height:180px;opacity:0;transform-origin:center}
-    .shield .shape{width:100%;height:100%;border-radius:18px;background:linear-gradient(180deg,#0ea5a0 0%, #7dd3fc 100%);opacity:.11;display:flex;align-items:center;justify-content:center;font-weight:700}
+    /* Animations simples */
+    @keyframes patientShake {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0); }
+    }
 
-    .scanner{position:absolute;right:6%;top:12%;width:160px;height:160px;border-radius:12px;opacity:0;display:flex;align-items:center;justify-content:center}
-    .beam{position:absolute;left:50%;transform:translateX(-50%);width:40px;height:220px;background:linear-gradient(180deg, rgba(167,139,250,0.18), rgba(79,70,229,0.14));top:60px;border-radius:8px;opacity:0}
-
-    /* keyframes */
-    @keyframes cutAnim{0%{opacity:0; transform:translateX(-30px) rotate(-30deg)}30%{opacity:1;transform:translateX(20px) rotate(10deg)}60%{transform:translateX(-10px) rotate(-15deg)}100%{opacity:0;transform:translateX(80px) rotate(20deg)}}
-    @keyframes shieldPulse{0%{opacity:0;transform:scale(.6)}40%{opacity:.16;transform:scale(1.03)}100%{opacity:0;transform:scale(1.2)}}
-    @keyframes scannerSpin{0%{opacity:0;transform:rotate(0) scale(.9)}20%{opacity:.9}100%{opacity:0;transform:rotate(360deg) scale(1.05)}}
-    @keyframes patientReact{0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)}}
-
-    .play-cut{animation:cutAnim .95s ease forwards}
-    .play-shield{animation:shieldPulse 1.2s ease forwards}
-    .play-scan{animation:scannerSpin 1.1s ease forwards}
-    .patient.bounce{animation:patientReact .8s ease}
+    /* Right info panel */
+    .right {
+      padding:24px;
+      border-left:1px solid rgba(255,255,255,0.03);
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,0.01));
+    }
+    .right h3 { margin-top:4px; color:var(--accent); }
+    .info {
+      background:rgba(255,255,255,0.02);
+      padding:14px;
+      border-radius:10px;
+      min-height:140px;
+    }
 
     /* overlay modals */
-    .overlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg, rgba(2,6,23,0.65), rgba(2,6,23,0.75));z-index:80}
-    .modal{background:linear-gradient(180deg,#071226,#061126);padding:26px;border-radius:12px;max-width:720px;border:1px solid rgba(255,255,255,0.04);text-align:center}
-    .modal h1{margin:0 0 6px 0;font-size:20px;color:var(--accent)}
-    .modal p{color:var(--muted);margin:8px 0 16px}
-    .primary{background:linear-gradient(90deg,var(--accent), #9be6d1);color:#052018;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
-    .secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer}
+    .overlay {
+      position:fixed; inset:0;
+      display:grid; place-items:center;
+      background:linear-gradient(180deg, rgba(2,6,23,0.65), rgba(2,6,23,0.75));
+      z-index:80;
+    }
+    .modal {
+      background:linear-gradient(180deg,#071226,#061126);
+      padding:26px; border-radius:12px;
+      max-width:720px; border:1px solid rgba(255,255,255,0.04);
+      text-align:center;
+    }
+    .modal h1 { margin:0 0 6px 0; font-size:22px; color:var(--accent); }
+    .modal p { color:var(--muted); margin:8px 0 16px; }
+    .primary {
+      background:linear-gradient(90deg, var(--accent), #9be6d1);
+      color:#052018;
+      padding:10px 14px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+    }
+    .secondary {
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      padding:8px 12px; border-radius:8px;
+      color:var(--muted); cursor:pointer;
+    }
 
     /* small screens */
-    @media (max-width:980px){.container{grid-template-columns:1fr;grid-template-rows:auto auto auto}.left,.right{order:2}.center{order:1;padding:12px}.stage{width:320px;height:320px}.right{padding:18px}}
+    @media (max-width:980px){
+      .container { grid-template-columns:1fr; grid-template-rows:auto auto auto; }
+      .left, .right { order:2; }
+      .center { order:1; padding:12px; }
+      .stage { width:320px; height:320px; }
+      .right { padding:18px; }
+    }
   </style>
 </head>
 <body>
@@ -79,57 +206,36 @@
         <button class="btn" id="btn2" data-action="preventive">2. Appliquer une méthode préventive</button>
         <button class="btn" id="btn3" data-action="irm">3. Faire un IRM</button>
         <div style="flex:1"></div>
-        <small style="color:var(--muted)">Utilisez les boutons pour tester des méthodes — observez les animations et l'explication à droite.</small>
+        <small style="color:var(--muted)">Utilisez les boutons pour tester les méthodes — observez les animations et l’explication à droite.</small>
       </div>
 
       <div class="center">
         <div class="stage" role="main" aria-label="Scène d'opération">
+          <div class="tube" id="tube" aria-hidden="true"></div>
           <div class="patient" id="patient" aria-hidden="false">
-            <div class="head" id="head">
-              <div style="display:flex;align-items:center;justify-content:center">
-                <div class="eye"></div>
-                <div class="eye"></div>
-              </div>
-            </div>
-            <div class="body" id="torso">
-              <div style="text-align:center;color:#0b1720;font-weight:700">Patient</div>
-            </div>
+            <div class="head"><div style="display:flex;align-items:center;justify-content:center"><div class="eye"></div><div class="eye"></div></div></div>
+            <div class="body"><div style="text-align:center;color:#0b1720;font-weight:700">Patient</div></div>
           </div>
-
-          <!-- scalpel -->
-          <div class="scalpel" id="scalpel" aria-hidden="true">
-            <div class="blade"></div>
-          </div>
-
-          <!-- shield (preventive) -->
-          <div class="shield" id="shield" aria-hidden="true">
-            <div class="shape">Prévention</div>
-          </div>
-
-          <!-- scanner (IRM) -->
-          <div class="scanner" id="scanner" aria-hidden="true">
-            <div style="width:120px;height:28px;border-radius:6px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;">IRM</div>
-          </div>
-
-          <div class="beam" id="beam"></div>
+          <div class="doctor left" id="docL">Dr.</div>
+          <div class="doctor right" id="docR">Dr.</div>
         </div>
       </div>
 
       <div class="right">
         <h3>Informations</h3>
         <div class="info" id="info">
-          <p>Soyez médecin. Choisissez une méthode à gauche pour l'appliquer au patient. Les animations illustrent l'effet.</p>
+          <p>Soyez médecin. Choisissez une méthode à gauche pour l’appliquer au patient. Les animations illustrent l’effet.</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Overlay d'intro -->
+  <!-- Overlay d’intro -->
   <div class="overlay" id="intro">
     <div class="modal">
       <h1>Bienvenue</h1>
       <p>Vous êtes médecin. Étudiez la radiologie pour soigner le patient. Testez les 3 méthodes (curative, préventive, IRM).</p>
-      <div style="display:flex;gap:12px;justify-content:center;margin-top:12px">
+      <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
         <button class="primary" id="start">Commencer</button>
         <button class="secondary" id="explain">À quoi ça sert ?</button>
       </div>
@@ -137,18 +243,17 @@
   </div>
 
   <!-- Overlay de fin -->
-  <div class="overlay" id="finish" style="display:none;z-index:90">
+  <div class="overlay" id="finish" style="display:none; z-index:90;">
     <div class="modal">
       <h1>Patient sauvé ! 🎉</h1>
       <p>Grâce à vos interventions, le patient est en sécurité. Voulez-vous recommencer ?</p>
-      <div style="display:flex;gap:12px;justify-content:center;margin-top:12px">
+      <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
         <button class="primary" id="restart">Recommencer</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Éléments
     const intro = document.getElementById('intro');
     const mainApp = document.getElementById('mainApp');
     const btn1 = document.getElementById('btn1');
@@ -156,113 +261,119 @@
     const btn3 = document.getElementById('btn3');
     const info = document.getElementById('info');
     const patient = document.getElementById('patient');
-    const scalpel = document.getElementById('scalpel');
-    const shield = document.getElementById('shield');
-    const scanner = document.getElementById('scanner');
-    const beam = document.getElementById('beam');
+    const tube = document.getElementById('tube');
+    const docL = document.getElementById('docL');
+    const docR = document.getElementById('docR');
     const finish = document.getElementById('finish');
 
-    // Etat pour vérifier si on a utilisé les 3 méthodes
-    const used = new Set();
-
-    // Explications (texte pédagogique, en français)
     const texts = {
       curative: `<h4>Méthode curative</h4>
-                <p>La méthode curative consiste à intervenir directement pour soigner une lésion ou enlever une anomalie. En radiologie, cela peut être guidé par l'imagerie (ex: radiologie interventionnelle) : un instrument est placé précisément à l'aide d'images pour traiter la zone malade.</p>
-                <ul><li>Objectif : guérir ou retirer un problème existant.</li><li>Exemples : drainage, ablation, embolisation.</li></ul>`,
+                 <p>La méthode curative consiste à intervenir directement pour soigner une lésion ou retirer une anomalie. En radiologie interventionnelle, on guide un instrument grâce à l’imagerie pour traiter la zone malade.</p>
+                 <ul><li>Objectif : guérir ou retirer un problème existant.</li><li>Exemples : drainage, ablation, embolisation.</li></ul>`,
       preventive: `<h4>Méthode préventive</h4>
-                <p>Les méthodes préventives visent à réduire le risque de complications et à améliorer la santé avant qu'un problème grave n'apparaisse. En radiologie, cela inclut des procédures et recommandations pour limiter les risques, comme la vaccination, l'hygiène, ou la surveillance par imagerie.</p>
-                <ul><li>Objectif : protéger et réduire les risques.</li><li>Exemples : dépistage, suivi régulier, mesures d'hygiène.</li></ul>`,
+                  <p>Les méthodes préventives visent à réduire le risque de complications et à améliorer la santé avant qu’un problème grave n’apparaisse. En radiologie, cela peut inclure le dépistage, la surveillance ou des recommandations d’hygiène.</p>
+                  <ul><li>Objectif : protéger et réduire les risques.</li><li>Exemples : dépistage, suivi régulier, mesures d’hygiène.</li></ul>`,
       irm: `<h4>IRM (Imagerie par Résonance Magnétique)</h4>
-                <p>L'IRM est une technique d'imagerie non invasive qui utilise des champs magnétiques et des ondes radio pour obtenir des images détaillées des organes et tissus. Elle est très utile pour diagnostiquer des anomalies internes et guider le choix thérapeutique.</p>
-                <ul><li>Objectif : diagnostiquer et localiser une anomalie.</li><li>Exemples : imagerie cérébrale, examens musculo-squelettiques, détection de tumeurs.</li></ul>`
+            <p>L’IRM est une technique d’imagerie non invasive qui utilise des champs magnétiques et des ondes radio pour obtenir des images détaillées des organes et tissus. Très utile pour diagnostiquer des anomalies internes et guider le choix thérapeutique.</p>
+            <ul><li>Objectif : diagnostiquer et localiser une anomalie.</li><li>Exemples : imagerie cérébrale, examen musculo-squelettique, détection de tumeurs.</li></ul>`
     };
 
-    // Helper pour jouer animation + texte
-    function play(action){
-      // Empêche spam
-      if(!['curative','preventive','irm'].includes(action)) return;
+    const used = new Set();
 
-      // Show explanation
-      if(action === 'curative'){ info.innerHTML = texts.curative; playCurative(); }
-      if(action === 'preventive'){ info.innerHTML = texts.preventive; playPreventive(); }
-      if(action === 'irm'){ info.innerHTML = texts.irm; playIrm(); }
+    function play(action) {
+      if (!['curative','preventive','irm'].includes(action)) return;
+
+      if (action === 'curative') {
+        info.innerHTML = texts.curative;
+        playCurative();
+      }
+      if (action === 'preventive') {
+        info.innerHTML = texts.preventive;
+        playPreventive();
+      }
+      if (action === 'irm') {
+        info.innerHTML = texts.irm;
+        playIrm();
+      }
 
       used.add(action);
       checkIfFinished();
     }
 
     function playCurative(){
-      // animation scalpel + patient reaction
-      scalpel.classList.remove('play-cut'); shield.classList.remove('play-shield'); scanner.classList.remove('play-scan');
-      scalpel.style.opacity=1; scalpel.classList.add('play-cut');
-      patient.classList.add('bounce');
-      setTimeout(()=>{patient.classList.remove('bounce'); scalpel.style.opacity=0;},1000);
+      // médecins apparaissent
+      docL.classList.remove('animate');
+      docR.classList.remove('animate');
+      void docL.offsetWidth;
+      void docR.offsetWidth;
+      docL.classList.add('animate');
+      docR.classList.add('animate');
+
+      // patient réaction
+      patient.style.animation = 'patientShake .8s ease';
+      patient.addEventListener('animationend', ()=>{ patient.style.animation = ''; }, { once:true });
     }
+
     function playPreventive(){
-      scalpel.classList.remove('play-cut'); shield.classList.remove('play-shield'); scanner.classList.remove('play-scan');
-      shield.style.opacity=1; shield.classList.add('play-shield');
-      patient.classList.add('bounce');
-      setTimeout(()=>{patient.classList.remove('bounce'); shield.style.opacity=0;},1200);
+      // médecins apparaissent (identique)
+      docL.classList.remove('animate');
+      docR.classList.remove('animate');
+      void docL.offsetWidth;
+      void docR.offsetWidth;
+      docL.classList.add('animate');
+      docR.classList.add('animate');
+
+      // patient réaction
+      patient.style.animation = 'patientShake .8s ease';
+      patient.addEventListener('animationend', ()=>{ patient.style.animation = ''; }, { once:true });
     }
+
     function playIrm(){
-      scalpel.classList.remove('play-cut'); shield.classList.remove('play-shield'); scanner.classList.remove('play-scan');
-      beam.style.opacity=0.7; scanner.style.opacity=1; scanner.classList.add('play-scan');
-      patient.classList.add('bounce');
-      setTimeout(()=>{patient.classList.remove('bounce'); scanner.style.opacity=0; beam.style.opacity=0;},1100);
+      // tube animation + patient entre
+      tube.classList.remove('open');
+      void tube.offsetWidth;
+      tube.classList.add('open');
+
+      // patient shrink move
+      patient.style.transition = 'transform .8s ease, opacity .8s ease';
+      patient.style.transform = 'translateY(80px) scale(0.6)';
+      patient.style.opacity = '0.4';
+
+      setTimeout(()=>{
+        patient.style.transform = '';
+        patient.style.opacity = '';
+      }, 1000);
+
     }
 
     function checkIfFinished(){
-      if(used.size >= 3){
-        // délai court pour laisser l'utilisateur lire
-        setTimeout(()=>{finish.style.display='grid';},700);
+      if (used.size >= 3){
+        setTimeout(()=>{ finish.style.display='grid'; }, 1000);
       }
     }
 
-    // Event listeners
     btn1.addEventListener('click', ()=> play('curative'));
     btn2.addEventListener('click', ()=> play('preventive'));
     btn3.addEventListener('click', ()=> play('irm'));
 
     document.getElementById('start').addEventListener('click', ()=>{
-      intro.style.display='none';
+      intro.style.display = 'none';
       mainApp.setAttribute('aria-hidden','false');
     });
-
     document.getElementById('explain').addEventListener('click', ()=>{
-      alert('Ce mini-jeu illustre comment la radiologie peut aider au diagnostic (IRM), à la prévention et à l\'intervention (méthodes curatives). Utilisez les trois boutons pour voir les animations et lire les explications.');
+      alert('Ce mini-jeu illustre comment la radiologie peut aider : le diagnostic (IRM), la prévention, et l’intervention (méthodes curatives). Utilisez les trois boutons pour voir les animations et lire les explications.');
     });
-
     document.getElementById('restart').addEventListener('click', ()=>{
-      // reset
       used.clear();
-      finish.style.display='none';
-      info.innerHTML = '<p>Testez à nouveau les 3 méthodes.</p>';
+      finish.style.display = 'none';
+      info.innerHTML = `<p>Testez à nouveau les 3 méthodes.</p>`;
     });
 
     // Accessibilité clavier
-    [btn1,btn2,btn3].forEach(b=>b.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') b.click(); }))
+    [btn1,btn2,btn3].forEach(b => {
+      b.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') b.click(); });
+    });
 
-    // Small polish: place scalpel visually near patient
-    // We'll compute a nice position relative to stage
-    function positionTools(){
-      const stage = document.querySelector('.stage');
-      const rect = stage.getBoundingClientRect();
-      // scalpel to the right of patient
-      scalpel.style.left = (rect.width*0.56)+'px';
-      scalpel.style.top = (rect.height*0.18)+'px';
-      // shield left bottom
-      shield.style.left = (rect.width*0.08)+'px';
-      shield.style.top = (rect.height*0.38)+'px';
-      // scanner right top
-      scanner.style.left = (rect.width*0.62)+'px';
-      scanner.style.top = (rect.height*0.08)+'px';
-      // beam centering
-      beam.style.left = (rect.width*0.53)+'px';
-      beam.style.top = (rect.height*0.22)+'px';
-    }
-    window.addEventListener('resize', positionTools);
-    window.addEventListener('load', positionTools);
   </script>
 </body>
 </html>
