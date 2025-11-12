@@ -3,429 +3,402 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mini-jeu Radiologie — 3D</title>
+<title>Mini-jeu Radiologie — Stylisé & Net (3D)</title>
 <style>
   :root{
-    --bg:#0f1724; --accent:#6ee7b7; --muted:#94a3b8;
+    --bg:#0b1622; --accent:#6ee7b7; --muted:#9fb3c8; --card:#071428;
+    --panel:#071226;
     font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
   }
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,#071126 0%, #07172a 100%);color:#e6eef8}
-  .app{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-  .container{width:100%;max-width:1200px;border-radius:12px;overflow:hidden;display:grid;grid-template-columns:260px 1fr 360px;box-shadow:0 12px 40px rgba(0,0,0,.6);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))}
-  .left{padding:20px;border-right:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:12px}
-  .left h2{margin:0;color:var(--accent)}
-  .btn{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);padding:12px;border-radius:10px;color:var(--accent);font-weight:700;cursor:pointer;transition:transform .12s}
-  .btn:hover{transform:translateY(-4px)}
-  .center{position:relative;padding:8px;display:flex;align-items:center;justify-content:center}
-  .scene-wrap{width:680px;height:480px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#071c2b,#041220);box-shadow:inset 0 6px 40px rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#03121a);color:#e7f3fb}
+  .app{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .container{width:100%;max-width:1250px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;display:grid;grid-template-columns:280px 1fr 360px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+  .left{padding:20px;border-right:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;gap:12px;background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent)}
+  .left h2{margin:0;color:var(--accent);font-size:18px}
+  .btn{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);padding:12px;border-radius:10px;color:var(--accent);font-weight:700;cursor:pointer;transition:transform .12s, box-shadow .12s}
+  .btn:hover{transform:translateY(-4px);box-shadow:0 6px 18px rgba(0,0,0,.45)}
+  .center{padding:18px;display:flex;align-items:center;justify-content:center}
+  .scene-wrap{width:820px;height:520px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#041427,#03202a);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 18px 40px rgba(0,0,0,0.6)}
   canvas{display:block;width:100%;height:100%}
-  .right{padding:20px;border-left:1px solid rgba(255,255,255,0.03)}
-  .right h3{margin:0;color:var(--accent)}
-  .info{margin-top:12px;background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;min-height:160px;color:#dbeafe}
-  .overlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg, rgba(2,6,23,0.7), rgba(2,6,23,0.85));z-index:40}
-  .modal{background:linear-gradient(180deg,#071226,#061126);padding:24px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);text-align:center;color:var(--muted)}
+  .right{padding:20px;border-left:1px solid rgba(255,255,255,0.04)}
+  .right h3{margin:0;color:var(--accent);font-size:18px}
+  .info{margin-top:12px;background:rgba(255,255,255,0.02);padding:14px;border-radius:10px;min-height:160px;color:var(--muted)}
+  .overlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg, rgba(2,6,23,0.75), rgba(2,6,23,0.9));z-index:80}
+  .modal{background:linear-gradient(180deg,#071226,#061126);padding:22px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);text-align:center;color:var(--muted);width:88%;max-width:640px}
   .primary{background:linear-gradient(90deg,var(--accent),#9be6d1);border:none;padding:10px 14px;border-radius:10px;color:#052018;font-weight:800;cursor:pointer}
-  .small{font-size:13px;color:var(--muted);margin-top:8px}
-  @media (max-width:980px){ .container{grid-template-columns:1fr;grid-template-rows:auto auto auto}.scene-wrap{width:92vw;height:56vw} }
+  .small{font-size:13px;color:var(--muted)}
+  /* IRM progress indicator (overlay in scene) */
+  .irmProgress {
+    position:absolute; left:50%; top:6%; transform:translateX(-50%); background:rgba(0,0,0,0.28); padding:6px 10px; border-radius:999px; color:#cfeee6; font-weight:700; font-size:13px; z-index:12;
+    backdrop-filter: blur(4px);
+  }
+  @media (max-width:1100px){
+    .container{grid-template-columns:220px 1fr;grid-template-rows:auto auto}
+    .right{order:3}
+    .scene-wrap{width:92vw;height:52vh}
+  }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="container" id="appUI" aria-hidden="true">
+  <div class="container" id="uiApp" aria-hidden="true">
     <div class="left">
       <h2>Actions</h2>
       <button class="btn" id="btnCur">1. Appliquer une méthode curative</button>
       <button class="btn" id="btnPrev">2. Appliquer une méthode préventive</button>
       <button class="btn" id="btnIRM">3. Faire un IRM</button>
       <div style="flex:1"></div>
-      <div class="small">Observe la scène 3D : l'IRM fera entrer le patient dans le tube. Les médecins arrivent vus du dessus.</div>
+      <div class="small">Ce mini-jeu pédagogique illustre la radiologie. L'IRM fait réellement entrer le patient dans le tunnel 3D. Les médecins apparaissent vus du dessus.</div>
     </div>
 
     <div class="center">
-      <div class="scene-wrap" id="canvasContainer" role="main" aria-label="Scène 3D d'opération">
-        <!-- Le canvas WebGL sera injecté ici -->
+      <div class="scene-wrap" id="sceneWrap">
+        <div class="irmProgress" id="irmProgress" style="display:none">Scan : 0%</div>
+        <!-- three.js canvas -->
       </div>
     </div>
 
     <div class="right">
       <h3>Informations</h3>
       <div class="info" id="info">
-        <p>Vous êtes médecin. Choisissez une méthode pour soigner le patient. Animations 3D en direct.</p>
+        <p>Bienvenue — sélectionnez une méthode à gauche pour voir l'animation et lire l'explication pédagogique.</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Intro -->
+<!-- Intro modal -->
 <div class="overlay" id="intro">
   <div class="modal">
-    <h2 style="color:var(--accent);margin:0 0 8px 0">Bienvenue</h2>
-    <p class="small">Vous êtes médecin. Étudiez la radiologie pour soigner le patient. Appuyez sur <strong>Commencer</strong> pour accéder au mini-jeu 3D.</p>
-    <div style="margin-top:14px;display:flex;gap:10px;justify-content:center">
+    <h2 style="color:var(--accent);margin:0">Mini-jeu Radiologie — Projet ES</h2>
+    <p class="small" style="margin-top:10px">Tu es médecin. Observe la scène et teste : méthode curative, méthode préventive, IRM. Appuie sur <strong>Commencer</strong>.</p>
+    <div style="margin-top:14px">
       <button class="primary" id="startBtn">Commencer</button>
     </div>
   </div>
 </div>
 
-<!-- Finish -->
-<div class="overlay" id="finish" style="display:none;">
+<!-- Finish modal -->
+<div class="overlay" id="finish" style="display:none">
   <div class="modal">
-    <h2 style="color:var(--accent);margin:0 0 8px 0">Patient sauvé ! 🎉</h2>
-    <p class="small">Bravo — vous avez testé les 3 méthodes.</p>
-    <div style="margin-top:12px"><button class="primary" id="restartBtn">Recommencer</button></div>
+    <h2 style="color:var(--accent);margin:0">Patient sauvé 🎉</h2>
+    <p class="small" style="margin-top:10px">Félicitations ! Tu as testé les 3 méthodes.</p>
+    <div style="margin-top:12px">
+      <button class="primary" id="restartBtn">Recommencer</button>
+    </div>
   </div>
 </div>
 
-<!-- Three.js via modules -->
+<!-- Three.js and helpers (modules from CDN) -->
 <script type="module">
   import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
   import { OrbitControls } from 'https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js';
-  // small shader pass for subtle vignette (no external lib)
-
-  // UI elements
-  const btnCur = document.getElementById('btnCur');
-  const btnPrev = document.getElementById('btnPrev');
-  const btnIRM = document.getElementById('btnIRM');
-  const infoPanel = document.getElementById('info');
-  const container = document.getElementById('canvasContainer');
-  const intro = document.getElementById('intro');
-  const finish = document.getElementById('finish');
-  const startBtn = document.getElementById('startBtn');
-  const restartBtn = document.getElementById('restartBtn');
-  const appUI = document.getElementById('appUI');
-
-  const explanations = {
-    curative: `<h4 style="color:var(--accent);margin:0">Méthode curative</h4>
-               <p style="margin:6px 0 0">Intervention guidée par l'imagerie : le médecin intervient directement sur la lésion (ex: radiologie interventionnelle).</p>`,
-    preventive: `<h4 style="color:var(--accent);margin:0">Méthode préventive</h4>
-                 <p style="margin:6px 0 0">Actions pour réduire le risque et surveiller le patient (dépistage, surveillance).</p>`,
-    irm: `<h4 style="color:var(--accent);margin:0">IRM</h4>
-          <p style="margin:6px 0 0">Imagerie non invasive : l'IRM permet de diagnostiquer précisément. Ici, le patient entre dans le tunnel.</p>`
-  };
-
-  // --- Three.js scene setup ---
-  const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x061226, 0.02);
-
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  container.appendChild(renderer.domElement);
-
-  const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 200);
-  camera.position.set(0, 5, 10);
-
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.minDistance = 4;
-  controls.maxDistance = 18;
-  controls.maxPolarAngle = Math.PI / 2.1;
-
-  // Lights
-  const hemi = new THREE.HemisphereLight(0xb7eaf0, 0x081020, 0.45);
-  scene.add(hemi);
-
-  const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-  dir.position.set(5, 8, 5);
-  dir.castShadow = true;
-  dir.shadow.mapSize.set(2048,2048);
-  dir.shadow.camera.left = -10; dir.shadow.camera.right = 10; dir.shadow.camera.top = 10; dir.shadow.camera.bottom = -10;
-  scene.add(dir);
-
-  // subtle rim light
-  const rim = new THREE.PointLight(0x6ee7b7, 0.3, 20);
-  rim.position.set(-6, 4, -4);
-  scene.add(rim);
-
-  // ground / table
-  const tableGeo = new THREE.PlaneGeometry(40, 40);
-  const tableMat = new THREE.MeshStandardMaterial({ color: 0x071822, roughness: 0.9, metalness: 0.05 });
-  const table = new THREE.Mesh(tableGeo, tableMat);
-  table.rotation.x = -Math.PI / 2;
-  table.position.y = -1.4;
-  table.receiveShadow = true;
-  scene.add(table);
-
-  // --- Patient model (stylized capsule) ---
-  const patientGroup = new THREE.Group();
-  patientGroup.position.set(0, 0, 0);
-  scene.add(patientGroup);
-
-  // head
-  const headMat = new THREE.MeshStandardMaterial({ color: 0xffe0c8, roughness: 0.6 });
-  const headGeo = new THREE.SphereGeometry(0.6, 32, 32);
-  const head = new THREE.Mesh(headGeo, headMat);
-  head.castShadow = true;
-  head.position.set(0, 1.1, 0);
-  patientGroup.add(head);
-
-  // body (rounded capsule)
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffdfb8, roughness: 0.7 });
-  const bodyTop = new THREE.SphereGeometry(0.9, 32, 32);
-  const bodyBot = new THREE.SphereGeometry(0.9, 32, 32);
-  const mid = new THREE.CylinderGeometry(0.9, 0.9, 1.8, 32);
-  const topMesh = new THREE.Mesh(bodyTop, bodyMat);
-  const botMesh = new THREE.Mesh(bodyBot, bodyMat);
-  const midMesh = new THREE.Mesh(mid, bodyMat);
-  topMesh.position.set(0, 0.2, 0);
-  midMesh.position.set(0, -0.6, 0);
-  botMesh.position.set(0, -1.6, 0);
-  topMesh.castShadow = midMesh.castShadow = botMesh.castShadow = true;
-  patientGroup.add(topMesh, midMesh, botMesh);
-
-  // small label on body
-  const labelGeo = new THREE.PlaneGeometry(1.1, 0.4);
-  const labelMat = new THREE.MeshBasicMaterial({ color: 0x07232b });
-  const label = new THREE.Mesh(labelGeo, labelMat);
-  label.position.set(0, -0.4, 0.95);
-  patientGroup.add(label);
-
-  // center patient slightly above table
-  patientGroup.position.y = -0.4;
-
-  // --- MRI tube (realistic torus-like opening + inner cylinder) ---
-  const tubeGroup = new THREE.Group();
-  tubeGroup.position.set(0, -0.4, 0);
-  scene.add(tubeGroup);
-
-  // outer ring (rounded)
-  const ringOuterMat = new THREE.MeshStandardMaterial({ color: 0xdffbf2, emissive: 0x083236, emissiveIntensity: 0.06, roughness: 0.35 });
-  const ringGeo = new THREE.TorusGeometry(2.1, 0.45, 24, 80);
-  const ring = new THREE.Mesh(ringGeo, ringOuterMat);
-  ring.rotation.x = Math.PI / 2;
-  ring.castShadow = true;
-  ring.receiveShadow = false;
-  tubeGroup.add(ring);
-
-  // inner tunnel (slightly darker)
-  const tunnelMat = new THREE.MeshStandardMaterial({ color: 0x0a2a2e, roughness: 0.6, metalness: 0.2 });
-  const tunnelGeo = new THREE.CylinderGeometry(1.0, 1.0, 4.0, 64, 1, true);
-  const tunnel = new THREE.Mesh(tunnelGeo, tunnelMat);
-  tunnel.position.set(0, 0, -1.0);
-  tunnel.rotation.x = 0;
-  tunnel.receiveShadow = true;
-  tubeGroup.add(tunnel);
-
-  // animated inner glow ring (emissive slice)
-  const glowMat = new THREE.MeshBasicMaterial({ color: 0x6ee7b7, transparent: true, opacity: 0.12 });
-  const glowGeo = new THREE.RingGeometry(1.05, 1.9, 64);
-  const glow = new THREE.Mesh(glowGeo, glowMat);
-  glow.rotation.x = -Math.PI / 2;
-  tubeGroup.add(glow);
-
-  // hide tube initially (we will animate scale)
-  tubeGroup.scale.set(0.001, 0.001, 0.001);
-  tubeGroup.visible = false;
-
-  // doctors: top-view stylized shapes
-  const doctors = [];
-  const docMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.05 });
-  const docHeadMat = new THREE.MeshStandardMaterial({ color: 0xffe0c8 });
-
-  const docPositions = [
-    new THREE.Vector3(-2.6, -0.4, -0.4),
-    new THREE.Vector3(2.6, -0.4, -0.4),
-    new THREE.Vector3(-1.8, -0.4, 2.0),
-    new THREE.Vector3(1.8, -0.4, 2.0)
-  ];
-
-  docPositions.forEach((pos, idx) => {
-    const g = new THREE.Group();
-    // body (flat rectangle) — viewed from top, so flatten
-    const body = new THREE.BoxGeometry(0.7, 0.15, 1.4);
-    const bodyMesh = new THREE.Mesh(body, docMat);
-    bodyMesh.position.set(0, 0, 0);
-    bodyMesh.castShadow = true;
-    // small head sphere
-    const headS = new THREE.SphereGeometry(0.18, 12, 12);
-    const headMesh = new THREE.Mesh(headS, docHeadMat);
-    headMesh.position.set(0, 0.3, -0.45);
-
-    g.add(bodyMesh, headMesh);
-    g.position.copy(pos);
-    g.scale.set(0.001, 0.001, 0.001); // start hidden
-    g.userData = { idx };
-    scene.add(g);
-    doctors.push(g);
-  });
-
-  // subtle camera initial framing animation
-  let clock = new THREE.Clock();
-
-  // state flags
-  const used = new Set();
-
-  // FUNCTIONS: animations using simple tween approach (no external lib)
-  function tween(props){
-    // props: {object, to: {k:v}, duration(ms), easing, onComplete, onUpdate}
+  import { EffectComposer } from 'https://unpkg.com/three@0.152.2/examples/jsm/postprocessing/EffectComposer.js';
+  import { RenderPass } from 'https://unpkg.com/three@0.152.2/examples/jsm/postprocessing/RenderPass.js';
+  import { UnrealBloomPass } from 'https://unpkg.com/three@0.152.2/examples/jsm/postprocessing/UnrealBloomPass.js';
+  // module-level small tween helper (no lib)
+  function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+  function tweenProperty(object, propPath, toValue, duration=700, onUpdate=null, onComplete=null){
+    // propPath can be 'position.x' or array ['position','x'] etc.
     const start = performance.now();
-    const from = {};
-    for(const k in props.to) from[k] = props.object[k] !== undefined ? props.object[k] : props.object.position[k];
-    const duration = props.duration || 800;
-    const ease = props.easing || (t => (--t)*t*t+1); // simple ease-out-cubic
+    const path = Array.isArray(propPath) ? propPath : propPath.split('.');
+    let from = object;
+    for(let i=0;i<path.length-1;i++) from = from[path[i]];
+    const key = path[path.length-1];
+    const initial = from[key];
     function frame(now){
-      const t = Math.min(1, (now - start) / duration);
-      const e = ease(t);
-      for(const k in props.to){
-        const s = from[k];
-        const d = props.to[k];
-        if(k in props.object) props.object[k] = s + (d - s) * e;
-        else props.object.position[k] = s + (d - s) * e;
-      }
-      if(props.onUpdate) props.onUpdate(e);
-      if(t < 1) requestAnimationFrame(frame);
-      else if(props.onComplete) props.onComplete();
+      const t = Math.min(1,(now-start)/duration);
+      const e = easeOutCubic(t);
+      from[key] = initial + (toValue - initial) * e;
+      if(onUpdate) onUpdate(e);
+      if(t<1) requestAnimationFrame(frame);
+      else if(onComplete) onComplete();
     }
     requestAnimationFrame(frame);
   }
 
-  // helper show/hide tube with scaling + rotation to simulate 3D opening
-  function showTube(open = true, callback){
-    tubeGroup.visible = true;
+  // UI refs
+  const startBtn = document.getElementById('startBtn');
+  const intro = document.getElementById('intro');
+  const uiApp = document.getElementById('uiApp');
+  const btnCur = document.getElementById('btnCur');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnIRM = document.getElementById('btnIRM');
+  const info = document.getElementById('info');
+  const sceneWrap = document.getElementById('sceneWrap');
+  const finish = document.getElementById('finish');
+  const restartBtn = document.getElementById('restartBtn');
+  const irmProgress = document.getElementById('irmProgress');
+
+  const explanations = {
+    curative: `<h4 style="margin:0;color:${getComputedStyle(document.documentElement).getPropertyValue('--accent')}">Méthode curative</h4>
+               <p style="margin:8px 0 0;color:var(--muted)">Intervention guidée par image : on traite directement la lésion. Exemple : ablation.</p>`,
+    preventive: `<h4 style="margin:0;color:${getComputedStyle(document.documentElement).getPropertyValue('--accent')}">Méthode préventive</h4>
+                 <p style="margin:8px 0 0;color:var(--muted)">Actions pour réduire les risques : dépistage, surveillance et mesures d'hygiène.</p>`,
+    irm: `<h4 style="margin:0;color:${getComputedStyle(document.documentElement).getPropertyValue('--accent')}">IRM</h4>
+          <p style="margin:8px 0 0;color:var(--muted)">Imagerie haute définition : ici, le patient pénètre dans le tunnel pour un scan.</p>`
+  };
+
+  // Scene setup
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x041426);
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(sceneWrap.clientWidth, sceneWrap.clientHeight);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  sceneWrap.appendChild(renderer.domElement);
+
+  const camera = new THREE.PerspectiveCamera(42, sceneWrap.clientWidth / sceneWrap.clientHeight, 0.1, 200);
+  camera.position.set(0, 6.3, 10.8);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.minDistance = 5; controls.maxDistance = 25;
+  controls.maxPolarAngle = Math.PI / 2.05;
+
+  // Postprocessing: subtle bloom for crisp highlights
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  const bloomPass = new UnrealBloomPass(new THREE.Vector2(sceneWrap.clientWidth, sceneWrap.clientHeight), 0.18, 0.6, 0.9);
+  bloomPass.threshold = 0.8; bloomPass.strength = 0.9; bloomPass.radius = 0.2;
+  composer.addPass(bloomPass);
+
+  // Lights: crisp three-point-ish lighting
+  const hemi = new THREE.HemisphereLight(0xbfeff6, 0x061123, 0.55);
+  scene.add(hemi);
+  const key = new THREE.DirectionalLight(0xffffff, 0.95);
+  key.position.set(6, 9, 5);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048,2048);
+  key.shadow.camera.left = -10; key.shadow.camera.right = 10; key.shadow.camera.top = 10; key.shadow.camera.bottom = -10;
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xa6dfe0, 0.45);
+  fill.position.set(-6, 4, -6);
+  scene.add(fill);
+
+  // Ground/table
+  const tableMat = new THREE.MeshStandardMaterial({ color: 0x071827, roughness: 0.92, metalness: 0.02 });
+  const tableGeo = new THREE.CylinderGeometry(8.5, 8.5, 1.4, 64);
+  const table = new THREE.Mesh(tableGeo, tableMat);
+  table.receiveShadow = true;
+  table.position.y = -1.6;
+  scene.add(table);
+
+  // Stylized patient (clean crisp shapes)
+  const patient = new THREE.Group();
+  patient.position.set(0, -0.2, 0);
+  scene.add(patient);
+  // head
+  const headMat = new THREE.MeshStandardMaterial({ color: 0xffe5cd, roughness: 0.5 });
+  const headGeo = new THREE.SphereGeometry(0.6, 40, 26);
+  const head = new THREE.Mesh(headGeo, headMat); head.castShadow = true; head.position.set(0, 1.05, 0); patient.add(head);
+  // torso capsule
+  const torsoMat = new THREE.MeshStandardMaterial({ color: 0xffe2bd, roughness: 0.6 });
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.9, 1.6, 16, 24), torsoMat);
+  torso.castShadow = true; torso.position.set(0, -0.3, 0); patient.add(torso);
+  // small label plate
+  const label = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.42), new THREE.MeshBasicMaterial({ color: 0x0b2730 }));
+  label.position.set(0, -0.2, 0.98); patient.add(label);
+
+  // Add a thin pillow (slightly reflective)
+  const pillow = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.18, 0.9), new THREE.MeshStandardMaterial({ color: 0xcfe9e3, roughness: 0.6 }));
+  pillow.position.set(0, 0.4, 0.6); pillow.castShadow = false; patient.add(pillow);
+
+  // MRI tube: composed of ring (front), shell (cylinder), inner fascia for depth
+  const tube = new THREE.Group();
+  tube.position.set(0, -0.4, 0);
+  scene.add(tube);
+
+  const ringMat = new THREE.MeshStandardMaterial({ color: 0xe6fff8, emissive: 0x0c3e36, emissiveIntensity: 0.04, roughness: 0.28 });
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.4, 16, 120), ringMat);
+  ring.rotation.x = Math.PI / 2; ring.castShadow = true; tube.add(ring);
+
+  // inner tunnel (smooth cylinder with inside material)
+  const tunnelMat = new THREE.MeshStandardMaterial({ color: 0x0b2230, roughness: 0.7, metalness: 0.2, side: THREE.DoubleSide });
+  const tunnel = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 6.0, 64, 1, true), tunnelMat);
+  tunnel.position.set(0, 0, -1.4);
+  tube.add(tunnel);
+
+  // inner glowing bands for realism
+  const bandMat = new THREE.MeshStandardMaterial({ color: 0x6ee7b7, emissive: 0x6ee7b7, emissiveIntensity: 0.08, roughness: 0.8, transparent:true, opacity:0.18 });
+  const band1 = new THREE.Mesh(new THREE.RingGeometry(1.06, 1.9, 64), bandMat); band1.rotation.x = -Math.PI/2; band1.position.set(0,0,-0.5); tube.add(band1);
+  const band2 = new THREE.Mesh(new THREE.RingGeometry(1.06, 1.9, 64), bandMat); band2.rotation.x = -Math.PI/2; band2.position.set(0,0,-2.1); tube.add(band2);
+
+  // tube initial state: closed / scaled down
+  tube.scale.set(0.0001,0.0001,0.0001); tube.visible = false;
+
+  // Doctors (top-view stylized flat figures) : 4 around patient
+  const doctors = [];
+  const doctorMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
+  const docHeadMat = new THREE.MeshStandardMaterial({ color: 0xffe0c8, roughness: 0.4 });
+
+  const docCoords = [
+    new THREE.Vector3(-3.0, -0.4, -0.6),
+    new THREE.Vector3(3.0, -0.4, -0.6),
+    new THREE.Vector3(-2.0, -0.4, 2.2),
+    new THREE.Vector3(2.0, -0.4, 2.2)
+  ];
+
+  docCoords.forEach((pos, i)=>{
+    const g = new THREE.Group();
+    // body plate (flat)
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.18, 1.4), doctorMat);
+    body.position.set(0,0,0);
+    // head (small sphere)
+    const h = new THREE.Mesh(new THREE.SphereGeometry(0.16,16,12), docHeadMat);
+    h.position.set(0,0.28,-0.55);
+
+    g.add(body,h);
+    g.position.copy(pos);
+    g.scale.set(0.0001,0.0001,0.0001);
+    scene.add(g);
+    doctors.push(g);
+  });
+
+  // small helper: make patient "react" (tilt) during operations
+  function patientReact(){
+    tweenProperty(patient.rotation, 'x', 0.06, 180, null, ()=>{
+      tweenProperty(patient.rotation, 'x', 0, 250);
+    });
+  }
+
+  // show tube with scaling animation
+  function showTube(open=true, cb){
     if(open){
-      // scale up with slight rotation
-      tubeGroup.scale.set(0.001,0.001,0.001);
-      tween({ object: tubeGroup.scale, to: { x:1, y:1, z:1 }, duration: 700, onComplete: callback });
-      // light pulse on glow
-      let flash = {o:0.06};
-      tween({ object: glow.material, to: { opacity: 0.18 }, duration: 450, onComplete: ()=>{ tween({ object: glow.material, to: { opacity:0.08 }, duration:600 }) }});
+      tube.visible = true;
+      tube.scale.set(0.0001,0.0001,0.0001);
+      tweenProperty(tube.scale,'x',1.0,650);
+      tweenProperty(tube.scale,'y',1.0,650);
+      tweenProperty(tube.scale,'z',1.0,650, null, ()=>{ if(cb) cb(); });
     } else {
-      // scale down and hide
-      tween({ object: tubeGroup.scale, to: { x:0.001, y:0.001, z:0.001 }, duration: 500, onComplete: ()=>{ tubeGroup.visible = false; if(callback) callback(); }});
+      tweenProperty(tube.scale,'x',0.0001,520);
+      tweenProperty(tube.scale,'y',0.0001,520);
+      tweenProperty(tube.scale,'z',0.0001,520, null, ()=>{ tube.visible=false; if(cb) cb(); });
     }
   }
 
-  // IRM animation: open tube, slide patient in, then close + hide tube
+  // IRM sequence: open tube, slide patient into tunnel, progress bar, then close tube
   function playIRM(){
-    // show tube
+    irmProgress.style.display = 'block';
+    irmProgress.textContent = 'Scan : 0%';
     showTube(true, ()=>{
-      // slide patient forward (into negative z inside tunnel)
-      tween({ object: patientGroup.position, to: { x:0, y:-0.4, z:-1.4 }, duration: 950, onComplete: ()=>{
-        // brief scan "hold"
-        setTimeout(()=>{
-          // retract patient
-          tween({ object: patientGroup.position, to: { x:0, y:-0.4, z:0 }, duration: 800 });
-          // close tube
-          setTimeout(()=> showTube(false, ()=>{}), 160);
-        }, 400);
-      }});
-      // slight scale / opacity to imply depth
-      tween({ object: patientGroup.scale, to: { x:0.86, y:0.86, z:0.86 }, duration: 900, onComplete: ()=>{ tween({ object: patientGroup.scale, to: { x:1, y:1, z:1 }, duration:700 }) }});
-    });
+      // animate patient forward (z negative)
+      tweenProperty(patient.position, 'z', -1.6, 900);
+      tweenProperty(patient.scale, 'x', 0.9, 900); tweenProperty(patient.scale, 'y', 0.9, 900); tweenProperty(patient.scale, 'z', 0.9, 900);
 
-    // glow pulse inside tunnel timed
-    tween({ object: glow.material, to: { opacity: 0.28 }, duration: 300, onComplete: ()=>{ tween({ object: glow.material, to: { opacity: 0.08 }, duration: 900 }); }});
+      // progress simulation
+      let t=0;
+      const interval = setInterval(()=>{
+        t += Math.random()*8 + 6; // variable increment
+        const pct = Math.min(100, Math.round(t));
+        irmProgress.textContent = `Scan : ${pct}%`;
+        if(pct>=100){
+          clearInterval(interval);
+          setTimeout(()=>{ // retract patient
+            tweenProperty(patient.position,'z',0,700);
+            tweenProperty(patient.scale,'x',1.0,700); tweenProperty(patient.scale,'y',1.0,700); tweenProperty(patient.scale,'z',1.0,700);
+            // close tube after patient retracted slightly
+            setTimeout(()=>{ showTube(false, ()=>{}); irmProgress.style.display='none'; }, 420);
+          }, 450);
+        }
+      }, 80);
+    });
   }
 
-  // Doctors animation: appear (scale up), move slightly toward patient, stay, then leave (scale down)
+  // doctors appear, approach a bit, then leave
   function playDoctors(){
-    const inTime = 450, hold = 700, outTime = 500;
-    doctors.forEach((d, i) => {
-      // appear with delay
+    doctors.forEach((d, i)=>{
       setTimeout(()=>{
-        tween({ object: d.scale, to: { x:1, y:1, z:1 }, duration: inTime });
-        // small approach movement toward patient
-        const dest = d.position.clone();
-        const approach = dest.clone().lerp(new THREE.Vector3(0, d.position.y, 0.4), 0.45);
-        tween({ object: d.position, to: { x: approach.x, y: approach.y, z: approach.z }, duration: inTime + 150 });
-        // stay then retreat
+        tweenProperty(d.scale, 'x', 1.0, 420); tweenProperty(d.scale, 'y', 1.0, 420); tweenProperty(d.scale, 'z', 1.0, 420);
+        const original = d.position.clone();
+        const approach = original.clone().lerp(new THREE.Vector3(0, original.y, 0.8), 0.44);
+        tweenProperty(d.position, 'x', approach.x, 480); tweenProperty(d.position, 'z', approach.z, 480);
+        // hold then retreat
         setTimeout(()=>{
-          tween({ object: d.position, to: { x: dest.x, y: dest.y, z: dest.z }, duration: outTime });
-          tween({ object: d.scale, to: { x:0.001, y:0.001, z:0.001 }, duration: outTime });
-        }, inTime + hold);
-      }, i * 120);
+          tweenProperty(d.position, 'x', original.x, 420); tweenProperty(d.position,'z', original.z, 420);
+          tweenProperty(d.scale, 'x', 0.0001, 420); tweenProperty(d.scale,'y',0.0001,420); tweenProperty(d.scale,'z',0.0001,420);
+        }, 1100 + i*60);
+      }, i*90);
     });
-
-    // patient reacts slightly
-    tween({ object: patientGroup.rotation, to: { x:0.06, y:0, z:0 }, duration: 250, onComplete: ()=>{ tween({ object: patientGroup.rotation, to: { x:0, y:0, z:0 }, duration: 350 }) }});
   }
 
-  // Simple "curative" and "preventive" differ by a little color / blink
+  // play curative: doctors + patient react + stronger rim light pulse
   function playCurative(){
-    // doctors perform
     playDoctors();
-    // small instrument flash near patient (simulated by rim intensification)
-    tween({ object: rim, to: { intensity: 1.2 }, duration: 180, onComplete: ()=>{ tween({ object: rim, to: { intensity: 0.3 }, duration: 400 }); }});
+    patientReact();
+    // flash of directional light intensity
+    const init = key.intensity;
+    tweenProperty(key, 'intensity', init * 1.4, 180, null, ()=>{ tweenProperty(key,'intensity',init,360); });
   }
 
+  // play preventive: doctors + gentle green aura
   function playPreventive(){
     playDoctors();
-    // gentle green aura around patient (temporary)
-    const aura = new THREE.PointLight(0x7ee7b7, 0.0, 4);
-    aura.position.set(0, 0.3, 0);
+    patientReact();
+    const aura = new THREE.PointLight(0x74f0c8, 0, 3.6);
+    aura.position.set(0,0.2,0);
     scene.add(aura);
-    tween({ object: aura, to: { intensity: 1.2 }, duration: 320, onComplete: ()=>{ tween({ object: aura, to: { intensity: 0.0 }, duration: 700, onComplete: ()=> scene.remove(aura) }); }});
+    tweenProperty(aura, 'intensity', 1.6, 260, null, ()=>{ tweenProperty(aura,'intensity',0,640, null, ()=> scene.remove(aura)); });
   }
 
-  // Animation loop
-  function animate(){
-    const dt = clock.getDelta();
+  // animation loop
+  function resize(){
+    const w = sceneWrap.clientWidth, h = sceneWrap.clientHeight;
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    renderer.setSize(w,h); composer.setSize(w,h);
+  }
+  window.addEventListener('resize', resize);
+
+  const clock = new THREE.Clock();
+  function renderLoop(){
     controls.update();
-    // small auto-rotation of ring for life
-    ring.rotation.z += 0.001 * (1 + Math.sin(clock.elapsedTime * 0.5) * 0.5);
-    glow.rotation.z += 0.002;
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
+    // slight life animations
+    ring.rotation.z += 0.002 + Math.sin(clock.getElapsedTime()*0.6)*0.0008;
+    band1.rotation.z += 0.0024; band2.rotation.z -= 0.0018;
+    composer.render();
+    requestAnimationFrame(renderLoop);
   }
 
-  // handle resize
-  function onResize(){
-    const w = container.clientWidth, h = container.clientHeight;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  }
-  window.addEventListener('resize', onResize);
-
-  // UI hookup & "game" logic
-  btnCur.addEventListener('click', ()=>{ infoPanel.innerHTML = explanations.curative; playCurative(); markUsed('curative'); });
-  btnPrev.addEventListener('click', ()=>{ infoPanel.innerHTML = explanations.preventive; playPreventive(); markUsed('preventive'); });
-  btnIRM.addEventListener('click', ()=>{ infoPanel.innerHTML = explanations.irm; playIRM(); markUsed('irm'); });
-
-  function markUsed(key){
-    used.add(key);
-    if(used.size >= 3){
-      setTimeout(()=>{ finish.style.display = 'grid'; }, 1200);
+  // Game logic: track used methods
+  const used = new Set();
+  function markUsed(k){
+    used.add(k);
+    if(used.size>=3){
+      setTimeout(()=>{ finish.style.display = 'grid'; }, 900);
     }
   }
 
-  // start / restart behavior
+  // UI hookups
+  btnCur.addEventListener('click', ()=>{ info.innerHTML = explanations.curative; playCurative(); markUsed('cur'); });
+  btnPrev.addEventListener('click', ()=>{ info.innerHTML = explanations.preventive; playPreventive(); markUsed('prev'); });
+  btnIRM.addEventListener('click', ()=>{ info.innerHTML = explanations.irm; playIRM(); markUsed('irm'); });
+
   startBtn.addEventListener('click', ()=>{
-    intro.style.display = 'none';
-    appUI.setAttribute('aria-hidden','false');
-    // initial camera animation to frame scene
-    tween({ object: camera.position, to: { x: 0, y: 4.8, z: 9 }, duration: 900 });
-    requestAnimationFrame(animate);
+    intro.style.display='none'; uiApp.setAttribute('aria-hidden','false');
+    // initial doctor hidden state
+    doctors.forEach(d=> d.scale.set(0.0001,0.0001,0.0001));
+    // camera subtle entrance
+    tweenProperty(camera.position, 'y', 5.2, 800); tweenProperty(camera.position,'z', 9.8, 900);
+    // start rendering
+    renderLoop();
   });
 
   restartBtn.addEventListener('click', ()=>{
     used.clear();
-    finish.style.display = 'none';
-    infoPanel.innerHTML = `<p>Testez à nouveau les 3 méthodes.</p>`;
-    // reset patient and tube
-    patientGroup.position.set(0, -0.4, 0);
-    patientGroup.scale.set(1,1,1);
-    tubeGroup.scale.set(0.001,0.001,0.001);
-    tubeGroup.visible = false;
-    doctors.forEach(d => { d.scale.set(0.001,0.001,0.001); });
-    // tiny camera bump
-    tween({ object: camera.position, to: { x: 0, y: 5, z: 10 }, duration: 700 });
+    finish.style.display='none';
+    info.innerHTML = '<p>Teste à nouveau les 3 méthodes.</p>';
+    // reset patient & tube & doctors
+    patient.position.set(0,-0.2,0); patient.scale.set(1,1,1);
+    tube.scale.set(0.0001,0.0001,0.0001); tube.visible=false;
+    doctors.forEach(d=>{ d.scale.set(0.0001,0.0001,0.0001); });
+    irmProgress.style.display='none';
   });
 
-  // initialise small ambient scene before start
-  // make tube hidden but place it ready
-  tubeGroup.visible = false;
-
-  // keyboard accessibility (Enter = start)
-  window.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter' && intro.style.display !== 'none'){ startBtn.click(); }
-  });
-
-  // Small safety: ensure renderer is resized to container if it's inserted late
-  onResize();
+  // kickstart a small ambient frame before start
+  resize();
 </script>
 </body>
 </html>
