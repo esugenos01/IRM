@@ -1,368 +1,133 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mini-Jeu — Bloc Opératoire Réaliste</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulation Salle d'Op Semi-Réaliste</title>
 <style>
-:root{
-  --accent:#6ee7b7; 
-  --muted:#9db2c9;
-  --bg:#0d1b2f;
-  --glass:rgba(255,255,255,0.04);
-  font-family:Inter,system-ui;
-}
+  body {
+    margin: 0;
+    background: #e0f7fa;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to top, #b2ebf2, #ffffff);
+  }
 
-html,body{
-  margin:0;
-  height:100%;
-  background:#0b1628;
-  color:white;
-}
+  /* Texte de début et fin */
+  .overlay-text {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    font-weight: bold;
+    color: #00796b;
+    text-align: center;
+    z-index: 10;
+    pointer-events: none;
+  }
 
-.app{
-  display:flex;
-  min-height:100vh;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
+  /* Salle d'op stylisée */
+  #room {
+    position: absolute;
+    width: 80%;
+    height: 70%;
+    left: 10%;
+    bottom: 10%;
+    background: #b3e5fc;
+    border-radius: 20px;
+    box-shadow: inset -10px -10px 30px rgba(0,0,0,0.2);
+  }
 
-.container{
-  width:100%;
-  max-width:1200px;
-  display:grid;
-  grid-template-columns:260px 1fr 340px;
-  border-radius:14px;
-  overflow:hidden;
-  background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));
-  box-shadow:0 6px 30px rgba(0,0,0,0.35);
-}
+  /* Patient SVG */
+  #patient {
+    position: absolute;
+    width: 100px;
+    height: 200px;
+    left: 50%;
+    bottom: 20%;
+    transform: translateX(-50%);
+  }
 
-/* LEFT PANEL */
-.left{
-  padding:20px;
-  background:rgba(255,255,255,0.02);
-  border-right:1px solid rgba(255,255,255,0.05);
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-.left h2{
-  margin:0;
-  font-size:18px;
-  color:var(--accent);
-}
-.btn{
-  padding:12px;
-  background:var(--glass);
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.05);
-  cursor:pointer;
-  transition:.2s;
-  font-weight:600;
-  color:var(--accent);
-}
-.btn:hover{
-  transform:translateY(-3px);
-}
-.btn:active{
-  transform:translateY(-1px);
-}
+  /* Instruments */
+  .instrument {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #cfd8dc;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    animation: float 2s infinite alternate;
+  }
 
-/* CENTER : BLOCK OPERATOIRE + PATIENT */
-.center{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  position:relative;
-}
-.stage{
-  width:500px;
-  height:500px;
-  position:relative;
-  border-radius:14px;
-  overflow:hidden;
-  background:#0b1e36;
-  box-shadow:inset 0 0 30px rgba(0,0,0,0.4);
-}
+  #scalpel {
+    left: 60%;
+    bottom: 35%;
+    animation-delay: 0s;
+  }
+  #monitor {
+    left: 30%;
+    bottom: 50%;
+    width: 120px;
+    height: 80px;
+    border-radius: 8px;
+    background: #455a64;
+    animation-delay: 1s;
+  }
 
-/* --- BACKGROUND: salle d'opération en SVG --- */
-.stage::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background-size:cover;
-  background-position:center;
-  opacity:0.85;
-  background-image:url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnL3N2ZyI+PGxpbmVhckdyYWRpZW50IGlkPSJiIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMTQyZjRmIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGExYjMyIi8+PC9saW5lYXJHcmFkaWVudD48cmVjdCBmaWxsPSJ1cmwoI2IpIiB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIvPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNjAiIHg9IjUwIiB5PSIyMCIgZmlsbD0iIzE2MzQ1YSIgcng9IjMwIi8+PHJlY3QgeD0iMTAwIiB5PSIyMDAiIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAiIGZpbGw9IiMxZDM5N2MiIHJ4PSIxNSIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjEyMCIgcj0iNjAiIGZpbGw9IiMxZTQ3NzgiIG9wYWNpdHk9IjAuNiIvPjwvc3ZnPg==");
-}
-
-/* TABLE D’OPÉRATION */
-.table{
-  position:absolute;
-  left:50%;
-  top:55%;
-  width:260px;
-  height:160px;
-  transform:translateX(-50%);
-  background-image:url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjYwIiBoZWlnaHQ9IjE2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnL3N2ZyI+PHJlY3QgeD0iMCIgeT0iNDQiIHdpZHRoPSIyNjAiIGhlaWdodD0iNzAiIHJ4PSIyMCIgZmlsbD0iIzI0M2Y1NSIvPjxsaW5lIGtleG89IjAiIHkxPSI0NCIgeDI9IjI2MCIgeTI9IjQ0IiBzdHlsZT0ic3Ryb2tlOiMxYzNlNDM7c3Ryb2tlLXdpZHRoOjQiLz48cmVjdCB4PSIxMCIgeT0iMTAwIiB3aWR0aD0iMjQiIGhlaWdodD0iNTUiIGZpbGw9IiMxYTNmNWMiIHJ4PSIyIi8+PHJlY3QgeD0iMjI2IiB5PSIxMDAiIHdpZHRoPSIyNCIgaGVpZ2h0PSI1NSIgZmlsbD0iIzFhM2Y1YyIgcnk9IjIiLz48L3N2Zz4=");
-  background-size:cover;
-  opacity:0.85;
-}
-
-/* LAMPES SCIALYTIQUES */
-.lamp{
-  position:absolute;
-  top:10%;
-  left:50%;
-  transform:translateX(-50%);
-  width:180px;
-  height:180px;
-  background-image:url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnL3N2ZyI+PGNpcmNsZSBjeD0iOTAiIGN5PSI5MCIgcj0iNzQiIGZpbGw9IiMxZDJmNGYiIG9wYWNpdHk9IjAuNzUiLz48Y2lyY2xlIGN4PSI5MCIgY3k9IjkwIiByPSI1MCIgZmlsbD0iI2QyZjVmYSIvPjxjaXJjbGUgY3g9IjkwIiBjeT0iOTAiIHI9IjIwIiBmaWxsPSIjZmZmIi8+PC9zdmc+");
-  opacity:0.6;
-  filter:drop-shadow(0 0 12px rgba(255,255,255,0.35));
-}
-
-/* PATIENT */
-.patient{
-  position:absolute;
-  top:33%;
-  left:50%;
-  transform:translate(-50%,0);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
-}
-.head{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  background:#ffd7c2;
-  border:4px solid rgba(0,0,0,0.1);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.eye{
-  width:10px;
-  height:10px;
-  background:#333;
-  border-radius:50%;
-  margin:0 6px;
-}
-.body{
-  width:120px;
-  height:170px;
-  border-radius:14px;
-  background:linear-gradient(180deg,#ffd7c2,#ffc9af);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#0d1b2f;
-  font-weight:600;
-}
-
-/* SCALPEL SVG */
-.scalpel{
-  position:absolute;
-  width:150px;
-  height:40px;
-  right:10%;
-  top:25%;
-  opacity:0;
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-image:url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjQwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxsaW5lIGx4PSIwIiB5xD0iMjAiIHgxPSIxMDAiIHkxPSIyMCIgc3R5bGU9InN0cm9rZTojZWRmNGY0O3N0cm9rZS13aWR0aDo2Ii8+PHJlY3QgeD0iMTAwIiB5PSI1IiB3aWR0aD0iNDQiIGhlaWdodD0iMzAiIHJ4PSIxIiBmaWxsPSIjZGY0Ii8+PC9zdmc+");
-}
-
-/* SHIELD */
-.shield{
-  position:absolute;
-  left:10%;
-  bottom:20%;
-  width:150px;
-  height:180px;
-  opacity:0;
-  background-repeat:no-repeat;
-  background-size:contain;
-  background-image:url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnL3N2ZyI+PHBhdGggZD0iTTE1MCA2MEwxMjAgMTQwIDc1IDE4MCAzMCAxNDAgMCA2MCA3NSAwbDE1MCA2MCIgZmlsbD0iIzc2ZGRmZiIgb3BhY2l0eT0iMC41Ii8+PC9zdmc+");
-}
-
-/* IRM ANNEAU */
-.irm{
-  position:absolute;
-  right:10%;
-  top:10%;
-  width:180px;
-  height:180px;
-  opacity:0;
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-image:url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnL3N2ZyI+PGNpcmNsZSBjeD0iOTAiIGN5PSI5MCIgcj0iODAiIGZpbGw9IiMzOTRmZjgiIG9wYWNpdHk9IjAuNyIvPjxjaXJjbGUgY3g9IjkwIiBjeT0iOTAiIHI9IjQ1IiBmaWxsPSJubyIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjQiLz48L3N2Zz4=");
-}
-
-/* IRM BEAM */
-.beam{
-  position:absolute;
-  width:40px;
-  height:280px;
-  left:calc(100% - 120px);
-  top:150px;
-  border-radius:20px;
-  background:linear-gradient(180deg,rgba(140,180,255,0.25),rgba(100,150,255,0.12));
-  opacity:0;
-  filter:blur(2px);
-}
-
-/* ANIMATIONS */
-@keyframes cut{
-  0%{opacity:0; transform:translateX(-40px) rotate(-20deg);}
-  40%{opacity:1; transform:translateX(20px) rotate(5deg);}
-  100%{opacity:0; transform:translateX(100px) rotate(20deg);}
-}
-@keyframes shieldPulse{
-  0%{opacity:0; transform:scale(.7);}
-  50%{opacity:.5; transform:scale(1.05);}
-  100%{opacity:0; transform:scale(1.25);}
-}
-@keyframes irmSpin{
-  0%{opacity:0; transform:rotate(0deg) scale(.85);}
-  20%{opacity:1;}
-  100%{opacity:0; transform:rotate(360deg) scale(1);}
-}
-@keyframes patientReact{
-  0%{transform:translate(-50%,0);}
-  50%{transform:translate(-50%,-8px);}
-  100%{transform:translate(-50%,0);}
-}
-
-.play-cut{ animation:cut 1s ease forwards; }
-.play-shield{ animation:shieldPulse 1.2s ease forwards; }
-.play-irm{ animation:irmSpin 1.2s ease forwards; }
-.patient.bounce{ animation:patientReact .7s ease; }
-
-/* RIGHT PANEL */
-.right{
-  padding:20px;
-  background:rgba(255,255,255,0.02);
-  border-left:1px solid rgba(255,255,255,0.05);
-}
-.info{
-  margin-top:10px;
-  background:rgba(255,255,255,0.03);
-  padding:14px;
-  border-radius:10px;
-  min-height:130px;
-}
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-10px); }
+  }
 </style>
 </head>
-
 <body>
-<div class="app">
-  <div class="container">
+<div id="game-container">
+  <div class="overlay-text" id="start-text">Bienvenue dans la simulation médicale</div>
 
-    <!-- LEFT -->
-    <div class="left">
-      <h2>Actions</h2>
-      <button class="btn" id="btnCur">1. Méthode curative</button>
-      <button class="btn" id="btnPre">2. Méthode préventive</button>
-      <button class="btn" id="btnIRM">3. IRM</button>
-      <div style="flex:1"></div>
-      <small style="color:var(--muted)">Testez les actions — observez les animations.</small>
-    </div>
+  <div id="room">
+    <!-- Patient SVG semi-réaliste cartoon -->
+    <svg id="patient" viewBox="0 0 100 200">
+      <!-- Corps -->
+      <rect x="30" y="50" width="40" height="100" rx="20" ry="20" fill="#ffe0bd" stroke="#000000" stroke-width="1"/>
+      <!-- Tête -->
+      <circle cx="50" cy="30" r="20" fill="#ffe0bd" stroke="#000000" stroke-width="1"/>
+      <!-- Yeux -->
+      <circle cx="42" cy="28" r="3" fill="#000"/>
+      <circle cx="58" cy="28" r="3" fill="#000"/>
+      <!-- Bouche -->
+      <path d="M42 40 Q50 50 58 40" stroke="#d32f2f" stroke-width="2" fill="transparent"/>
+      <!-- Bras -->
+      <rect x="10" y="60" width="20" height="60" rx="10" ry="10" fill="#ffe0bd" stroke="#000" stroke-width="1"/>
+      <rect x="70" y="60" width="20" height="60" rx="10" ry="10" fill="#ffe0bd" stroke="#000" stroke-width="1"/>
+      <!-- Pieds -->
+      <rect x="30" y="150" width="15" height="30" rx="5" ry="5" fill="#37474f"/>
+      <rect x="55" y="150" width="15" height="30" rx="5" ry="5" fill="#37474f"/>
+    </svg>
 
-    <!-- CENTER -->
-    <div class="center">
-      <div class="stage">
-
-        <div class="lamp"></div>
-        <div class="table"></div>
-
-        <!-- Patient -->
-        <div class="patient" id="patient">
-          <div class="head">
-            <div class="eye"></div><div class="eye"></div>
-          </div>
-          <div class="body">Patient</div>
-        </div>
-
-        <div class="scalpel" id="scalpel"></div>
-        <div class="shield" id="shield"></div>
-        <div class="irm" id="irm"></div>
-        <div class="beam" id="beam"></div>
-
-      </div>
-    </div>
-
-    <!-- RIGHT -->
-    <div class="right">
-      <h3>Informations</h3>
-      <div class="info" id="info">
-        <p>Choisissez une méthode pour voir son effet.</p>
-      </div>
-    </div>
-
+    <!-- Instruments -->
+    <div id="scalpel" class="instrument"></div>
+    <div id="monitor" class="instrument"></div>
   </div>
+
+  <div class="overlay-text" id="end-text" style="display:none;">Simulation terminée. Bravo !</div>
 </div>
 
 <script>
-const info = document.getElementById("info");
-const patient = document.getElementById("patient");
-const scalpel = document.getElementById("scalpel");
-const shield = document.getElementById("shield");
-const irm = document.getElementById("irm");
-const beam = document.getElementById("beam");
+  // Animation du texte de début et fin
+  setTimeout(() => {
+    document.getElementById('start-text').style.display = 'none';
+  }, 3000);
 
-const texts = {
-  cur: "<h4>Méthode curative</h4><p>Intervention directe guidée par l'imagerie pour retirer ou traiter une lésion.</p>",
-  pre: "<h4>Méthode préventive</h4><p>Procédures visant à réduire les risques et protéger la santé avant qu’un problème n’apparaisse.</p>",
-  irm: "<h4>IRM</h4><p>Technique d’imagerie utilisant un champ magnétique puissant pour produire des images très détaillées.</p>"
-};
-
-function playCurative(){
-  info.innerHTML = texts.cur;
-  scalpel.classList.remove("play-cut");
-  scalpel.offsetWidth; 
-  scalpel.classList.add("play-cut");
-  scalpel.style.opacity = 1;
-  bounce();
-}
-
-function playPreventive(){
-  info.innerHTML = texts.pre;
-  shield.classList.remove("play-shield");
-  shield.offsetWidth;
-  shield.classList.add("play-shield");
-  shield.style.opacity = 1;
-  bounce();
-}
-
-function playIRM(){
-  info.innerHTML = texts.irm;
-  irm.classList.remove("play-irm");
-  irm.offsetWidth;
-  irm.classList.add("play-irm");
-  irm.style.opacity = 1;
-
-  beam.style.opacity = 0.6;
-  setTimeout(()=> beam.style.opacity = 0, 1200);
-
-  bounce();
-}
-
-function bounce(){
-  patient.classList.add("bounce");
-  setTimeout(()=> patient.classList.remove("bounce"), 800);
-}
-
-document.getElementById("btnCur").onclick = playCurative;
-document.getElementById("btnPre").onclick = playPreventive;
-document.getElementById("btnIRM").onclick = playIRM;
+  // Fin simulation après 15 secondes
+  setTimeout(() => {
+    document.getElementById('end-text').style.display = 'block';
+  }, 15000);
 </script>
-
 </body>
 </html>
