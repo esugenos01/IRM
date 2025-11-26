@@ -1,0 +1,155 @@
+:root{
+  --bg:#0f1724;
+  --card:#0b1220;
+  --accent:#6ee7b7;
+  --muted:#94a3b8;
+  --glass: rgba(255,255,255,0.04);
+  font-family: Inter, sans-serif;
+}
+
+body{
+  background:#071126;
+  color:white;
+  margin:0;
+}
+
+.app{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.container{
+  width:100%;
+  max-width:1100px;
+  background:rgba(255,255,255,0.03);
+  display:grid;
+  grid-template-columns:260px 1fr 300px;
+  border-radius:14px;
+  overflow:hidden;
+}
+
+/* COLONNE GAUCHE */
+.left{
+  padding:20px;
+  border-right:1px solid rgba(255,255,255,0.05);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.left h2{
+  color:var(--accent);
+  margin:0 0 10px 0;
+}
+
+.btn{
+  background:var(--glass);
+  border:none;
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  color:var(--accent);
+  transition:transform .12s;
+}
+.btn:hover{ transform:translateY(-3px); }
+
+/* CENTRE */
+.center{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.stage{
+  width:420px;
+  height:420px;
+  background:linear-gradient(#081625,#04101e);
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+}
+
+/* PIXEL ART */
+.pixel{
+  width:96px;
+  height:96px;
+  position:absolute;
+  image-rendering:pixelated;
+}
+
+/* Placement du patient */
+.patient{
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%);
+}
+
+/* Docteurs */
+.doc{
+  top:55%;
+  opacity:0;
+}
+#doc1{ left:-150px; }
+#doc2{ right:-150px; }
+
+/* IRM */
+.irm{
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%) scale(1.2);
+  opacity:0;
+}
+
+/* Fumée */
+.smoke{
+  width:180px;
+  height:180px;
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%);
+  opacity:0;
+}
+
+/* Animations */
+@keyframes doc-enter-left{
+  to{ left:130px; opacity:1; }
+}
+
+@keyframes doc-enter-right{
+  to{ right:130px; opacity:1; }
+}
+
+@keyframes smoke-burst{
+  0%{ opacity:0; transform:translate(-50%,-50%) scale(.3); }
+  40%{ opacity:1; }
+  100%{ opacity:0; transform:translate(-50%,-50%) scale(1.4); }
+}
+
+@keyframes patient-slide-irm{
+  to{
+    transform:translate(-50%,-20%) scale(.9);
+    opacity:0.2;
+  }
+}
+
+/* COLONNE DROITE */
+.right{
+  padding:20px;
+  border-left:1px solid rgba(255,255,255,0.05);
+}
+
+.right h3{
+  color:var(--accent);
+  margin-top:0;
+}
+
+.info{
+  background:rgba(255,255,255,0.05);
+  padding:14px;
+  border-radius:10px;
+  min-height:120px;
+}
