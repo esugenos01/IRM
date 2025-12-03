@@ -7,12 +7,85 @@
   font-family: Inter, sans-serif;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body{
   background:#071126;
   color:white;
   margin:0;
+  overflow-x:hidden;
 }
 
+/* ===== PAGES PLEIN ÉCRAN ===== */
+.full-page{
+  min-height:100vh;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  position:fixed;
+  top:0;
+  left:0;
+  background:linear-gradient(135deg, #071126, #0a1a35);
+  animation: fadeIn 0.6s ease-in;
+}
+
+.full-page.hidden{
+  display:none;
+}
+
+.page-content{
+  text-align:center;
+  max-width:600px;
+  background:rgba(255,255,255,0.05);
+  padding:60px 40px;
+  border-radius:20px;
+  border:2px solid rgba(110, 231, 183, 0.3);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: slideUp 0.8s ease-out;
+}
+
+.main-title{
+  font-size:3rem;
+  color:var(--accent);
+  margin:0 0 20px 0;
+  text-shadow: 0 0 20px rgba(110, 231, 183, 0.5);
+}
+
+.main-title.success{
+  color:#6ee7b7;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.subtitle{
+  font-size:1.5rem;
+  color:#e2e8f0;
+  margin:0 0 40px 0;
+  line-height:1.6;
+}
+
+.btn-main{
+  background:var(--accent);
+  color:#071126;
+  border:none;
+  padding:18px 50px;
+  border-radius:12px;
+  font-weight:700;
+  font-size:1.2rem;
+  cursor:pointer;
+  transition:all .3s;
+  box-shadow: 0 4px 15px rgba(110, 231, 183, 0.4);
+}
+
+.btn-main:hover{
+  transform:scale(1.1) translateY(-3px);
+  box-shadow: 0 8px 30px rgba(110, 231, 183, 0.6);
+}
+
+/* ===== PAGE DE JEU ===== */
 .app{
   min-height:100vh;
   display:flex;
@@ -29,6 +102,7 @@ body{
   grid-template-columns:260px 1fr 300px;
   border-radius:14px;
   overflow:hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
 }
 
 /* COLONNE GAUCHE */
@@ -43,46 +117,72 @@ body{
 .left h2{
   color:var(--accent);
   margin:0 0 10px 0;
+  font-size:1.3rem;
 }
 
 .btn{
   background:var(--glass);
-  border:none;
-  padding:12px;
+  border:1px solid rgba(255,255,255,0.06);
+  padding:14px;
   border-radius:10px;
   cursor:pointer;
   font-weight:600;
   color:var(--accent);
-  transition:transform .12s;
+  transition:all .2s;
+  font-size:0.95rem;
 }
-.btn:hover{ transform:translateY(-3px); }
+
+.btn:hover{ 
+  transform:translateY(-3px);
+  background:rgba(110, 231, 183, 0.1);
+  box-shadow: 0 4px 12px rgba(110, 231, 183, 0.2);
+}
+
+.btn.completed{
+  background:rgba(110, 231, 183, 0.15);
+  border-color:var(--accent);
+  position:relative;
+}
+
+.btn.completed::after{
+  content:"✓";
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:1.2rem;
+}
 
 /* CENTRE */
 .center{
   display:flex;
   justify-content:center;
   align-items:center;
+  padding:20px;
 }
 
 .stage{
   width:420px;
   height:420px;
-  background:linear-gradient(#081625,#04101e);
+  background:linear-gradient(135deg, #081625, #04101e);
   border-radius:12px;
   position:relative;
   overflow:hidden;
+  border:1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
 /* PIXEL ART */
 .pixel{
-  width:96px;
-  height:96px;
+  width:80px;
+  height:80px;
   position:absolute;
   image-rendering:pixelated;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
-/* Placement du patient */
-.patient{
+/* Placement du patient - PARFAITEMENT CENTRÉ */
+#patient{
   left:50%;
   top:50%;
   transform:translate(-50%, -50%);
@@ -90,50 +190,104 @@ body{
 
 /* Docteurs */
 .doc{
-  top:55%;
+  top:50%;
+  transform:translateY(-50%);
   opacity:0;
 }
-#doc1{ left:-150px; }
-#doc2{ right:-150px; }
+
+#doc1{ 
+  left:-120px;
+}
+
+#doc2{ 
+  right:-120px;
+}
 
 /* IRM */
-.irm{
-  left:50%;
-  top:50%;
-  transform:translate(-50%, -50%) scale(1.2);
-  opacity:0;
-}
-
-/* Fumée */
-.smoke{
-  width:180px;
-  height:180px;
+#irm{
+  width:120px;
+  height:120px;
   left:50%;
   top:50%;
   transform:translate(-50%, -50%);
   opacity:0;
 }
 
-/* Animations */
+/* Fumée */
+#smoke{
+  width:150px;
+  height:150px;
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%);
+  opacity:0;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn{
+  from{ opacity:0; }
+  to{ opacity:1; }
+}
+
+@keyframes slideUp{
+  from{ 
+    opacity:0;
+    transform:translateY(30px);
+  }
+  to{ 
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+@keyframes pulse{
+  0%, 100%{ transform:scale(1); }
+  50%{ transform:scale(1.05); }
+}
+
 @keyframes doc-enter-left{
-  to{ left:130px; opacity:1; }
+  to{ 
+    left:80px;
+    opacity:1;
+  }
 }
 
 @keyframes doc-enter-right{
-  to{ right:130px; opacity:1; }
+  to{ 
+    right:80px;
+    opacity:1;
+  }
 }
 
 @keyframes smoke-burst{
-  0%{ opacity:0; transform:translate(-50%,-50%) scale(.3); }
-  40%{ opacity:1; }
-  100%{ opacity:0; transform:translate(-50%,-50%) scale(1.4); }
+  0%{ 
+    opacity:0; 
+    transform:translate(-50%,-50%) scale(.5) rotate(0deg);
+  }
+  40%{ 
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1) rotate(10deg);
+  }
+  100%{ 
+    opacity:0; 
+    transform:translate(-50%,-50%) scale(1.8) rotate(-10deg);
+  }
 }
 
 @keyframes patient-slide-irm{
-  to{
-    transform:translate(-50%,-20%) scale(.9);
+  0%{
+    transform:translate(-50%, -50%) scale(1);
+    opacity:1;
+  }
+  100%{
+    transform:translate(-50%, -30%) scale(.7);
     opacity:0.2;
   }
+}
+
+@keyframes patient-pulse{
+  0%, 100%{ transform:translate(-50%, -50%) scale(1); }
+  50%{ transform:translate(-50%, -50%) scale(1.1); }
 }
 
 /* COLONNE DROITE */
@@ -145,11 +299,38 @@ body{
 .right h3{
   color:var(--accent);
   margin-top:0;
+  font-size:1.3rem;
 }
 
 .info{
   background:rgba(255,255,255,0.05);
+  padding:16px;
+  border-radius:10px;
+  min-height:180px;
+  line-height:1.6;
+  font-size:0.95rem;
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.info p{
+  margin:0 0 12px 0;
+}
+
+.info strong{
+  color:var(--accent);
+}
+
+.progress-box{
+  margin-top:20px;
+  background:rgba(110, 231, 183, 0.08);
   padding:14px;
   border-radius:10px;
-  min-height:120px;
+  border:1px solid rgba(110, 231, 183, 0.2);
+}
+
+.progress-text{
+  margin:0;
+  color:var(--accent);
+  font-weight:600;
+  text-align:center;
 }
