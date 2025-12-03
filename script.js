@@ -1,3 +1,58 @@
+// Sélecteurs des pages
+const startPage = document.getElementById("startPage");
+const gamePage = document.getElementById("gamePage");
+const endPage = document.getElementById("endPage");
+
+// Sélecteurs du jeu
+const patient = document.getElementById("patient");
+const doc1 = document.getElementById("doc1");
+const doc2 = document.getElementById("doc2");
+const irm = document.getElementById("irm");
+const smoke = document.getElementById("smoke");
+const info = document.getElementById("info");
+const progressSpan = document.getElementById("progress");
+
+// Boutons
+const btnStart = document.getElementById("btnStart");
+const btnRestart = document.getElementById("btnRestart");
+const btn1 = document.getElementById("btn1");
+const btn2 = document.getElementById("btn2");
+const btn3 = document.getElementById("btn3");
+
+// État du jeu
+let completedActions = new Set();
+
+// Textes explicatifs pour Terminale ES
+const explanationTexts = {
+  curative: `<p><strong>Méthode curative</strong></p><p>Cette approche consiste à traiter une maladie déjà présente. En économie de la santé, elle représente un coût direct pour le système de santé. Les dépenses curatives constituent la majorité des budgets hospitaliers, avec des interventions chirurgicales, des traitements médicamenteux et un suivi post-opératoire.</p><p>Cette méthode privilégie l'efficacité immédiate mais peut s'avérer coûteuse à long terme pour la collectivité.</p>`,
+  
+  preventive: `<p><strong>Méthode préventive</strong></p><p>Cette stratégie vise à éviter l'apparition de maladies par des actions anticipées : vaccinations, dépistages, sensibilisation aux comportements à risque.</p><p>Économiquement, la prévention réduit les coûts futurs de santé et améliore la productivité sociale. Selon l'OMS, 1€ investi en prévention peut économiser jusqu'à 14€ en soins curatifs. C'est un investissement rentable pour la collectivité malgré des résultats parfois différés dans le temps.</p>`,
+  
+  irm: `<p><strong>IRM (Imagerie par Résonance Magnétique)</strong></p><p>Technologie médicale de diagnostic permettant de visualiser l'intérieur du corps sans intervention chirurgicale. L'acquisition d'un appareil IRM représente un investissement majeur pour un hôpital (entre 1 et 3 millions d'euros).</p><p>Cependant, elle améliore considérablement la qualité diagnostique et réduit les interventions exploratoires inutiles. C'est un exemple d'investissement en capital médical qui optimise les ressources à moyen terme.</p>`
+};
+
+// === NAVIGATION ENTRE LES PAGES ===
+
+function showStartPage() {
+  startPage.classList.remove("hidden");
+  gamePage.classList.add("hidden");
+  endPage.classList.add("hidden");
+}
+
+function showGamePage() {
+  startPage.classList.add("hidden");
+  gamePage.classList.remove("hidden");
+  endPage.classList.add("hidden");
+}
+
+function showEndPage() {
+  startPage.classList.add("hidden");
+  gamePage.classList.add("hidden");
+  endPage.classList.remove("hidden");
+}
+
+// === LOGIQUE DU JEU ===
+
 // Réinitialisation de la scène
 function resetScene() {
   doc1.style.animation = "";
@@ -23,7 +78,7 @@ function updateProgress() {
   
   // Vérifier si toutes les actions sont complétées
   if (completedActions.size === 3) {
-    setTimeout(showEndMessage, 1000);
+    setTimeout(showEndPage, 1500);
   }
 }
 
@@ -109,42 +164,30 @@ function playIrm() {
   }, 3100);
 }
 
+// === ÉVÉNEMENTS ===
+
 // Démarrage du jeu
-function startGame() {
-  startMessage.classList.add("hidden");
-  btn1.disabled = false;
-  btn2.disabled = false;
-  btn3.disabled = false;
-  
+btnStart.onclick = function() {
+  showGamePage();
   info.innerHTML = `<p>Choisissez une action pour soigner le patient. Vous devez effectuer les 3 interventions médicales.</p>`;
-}
+};
 
 // Redémarrage du jeu
-function restartGame() {
-  endMessage.classList.add("hidden");
-  startMessage.classList.remove("hidden");
-  
+btnRestart.onclick = function() {
   // Réinitialiser l'état
   completedActions.clear();
   btn1.classList.remove("completed");
   btn2.classList.remove("completed");
   btn3.classList.remove("completed");
-  btn1.disabled = true;
-  btn2.disabled = true;
-  btn3.disabled = true;
   
-  updateProgress();
+  progressSpan.textContent = "0/3";
   resetScene();
-}
+  
+  // Retour à la page de début
+  showStartPage();
+};
 
-// Afficher le message de fin
-function showEndMessage() {
-  endMessage.classList.remove("hidden");
-}
-
-/* Événements des boutons */
+// Boutons d'actions
 btn1.onclick = playCurative;
 btn2.onclick = playPreventive;
 btn3.onclick = playIrm;
-btnStart.onclick = startGame;
-btnRestart.onclick = restartGame;
