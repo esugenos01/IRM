@@ -32,7 +32,6 @@ const explanationTexts = {
 };
 
 // === NAVIGATION ENTRE LES PAGES ===
-
 function showStartPage() {
   startPage.classList.remove("hidden");
   gamePage.classList.add("hidden");
@@ -52,8 +51,6 @@ function showEndPage() {
 }
 
 // === LOGIQUE DU JEU ===
-
-// Réinitialisation de la scène
 function resetScene() {
   doc1.style.animation = "";
   doc2.style.animation = "";
@@ -66,23 +63,19 @@ function resetScene() {
   irm.style.opacity = 0;
   smoke.style.opacity = 0;
   
-  doc1.style.left = "-150px";
-  doc2.style.right = "-150px";
+  doc1.style.left = "-120px";
+  doc2.style.right = "-120px";
   patient.style.opacity = 1;
   patient.style.transform = "translate(-50%, -50%)";
 }
 
-// Mise à jour de la progression
 function updateProgress() {
   progressSpan.textContent = `${completedActions.size}/3`;
-  
-  // Vérifier si toutes les actions sont complétées
   if (completedActions.size === 3) {
     setTimeout(showEndPage, 1500);
   }
 }
 
-// Marquer une action comme complétée
 function completeAction(actionId, buttonElement) {
   if (!completedActions.has(actionId)) {
     completedActions.add(actionId);
@@ -96,16 +89,13 @@ function playCurative() {
   resetScene();
   info.innerHTML = explanationTexts.curative;
   
-  // Animation des deux docteurs
   doc1.style.animation = "doc-enter-left 1s forwards";
   doc2.style.animation = "doc-enter-right 1s forwards";
   
-  // Effet de soin
   setTimeout(() => {
     smoke.style.animation = "smoke-burst 1.2s forwards";
   }, 1100);
   
-  // Pulse du patient
   setTimeout(() => {
     patient.style.animation = "patient-pulse 0.8s ease-in-out";
   }, 1200);
@@ -113,7 +103,7 @@ function playCurative() {
   setTimeout(() => {
     resetScene();
     completeAction('curative', btn1);
-  }, 2300);
+  }, 2400);
 }
 
 /* MÉTHODE PRÉVENTIVE */
@@ -121,10 +111,8 @@ function playPreventive() {
   resetScene();
   info.innerHTML = explanationTexts.preventive;
   
-  // Un seul docteur pour la prévention
   doc1.style.animation = "doc-enter-left 1s forwards";
   
-  // Effet de prévention
   setTimeout(() => {
     smoke.style.animation = "smoke-burst 1.2s forwards";
   }, 1100);
@@ -136,7 +124,7 @@ function playPreventive() {
   setTimeout(() => {
     resetScene();
     completeAction('preventive', btn2);
-  }, 2300);
+  }, 2400);
 }
 
 /* MÉTHODE IRM */
@@ -144,16 +132,13 @@ function playIrm() {
   resetScene();
   info.innerHTML = explanationTexts.irm;
   
-  // Apparition de l'IRM
   irm.style.opacity = 1;
   irm.style.animation = "fadeIn 0.6s ease-in";
   
-  // Le patient glisse dans l'IRM
   setTimeout(() => {
     patient.style.animation = "patient-slide-irm 1.5s forwards";
   }, 400);
   
-  // Effet de scan
   setTimeout(() => {
     smoke.style.animation = "smoke-burst 1.2s forwards";
   }, 1900);
@@ -161,33 +146,25 @@ function playIrm() {
   setTimeout(() => {
     resetScene();
     completeAction('irm', btn3);
-  }, 3100);
+  }, 3200);
 }
 
 // === ÉVÉNEMENTS ===
-
-// Démarrage du jeu
 btnStart.onclick = function() {
   showGamePage();
   info.innerHTML = `<p>Choisissez une action pour soigner le patient. Vous devez effectuer les 3 interventions médicales.</p>`;
 };
 
-// Redémarrage du jeu
 btnRestart.onclick = function() {
-  // Réinitialiser l'état
   completedActions.clear();
   btn1.classList.remove("completed");
   btn2.classList.remove("completed");
   btn3.classList.remove("completed");
-  
   progressSpan.textContent = "0/3";
   resetScene();
-  
-  // Retour à la page de début
   showStartPage();
 };
 
-// Boutons d'actions
 btn1.onclick = playCurative;
 btn2.onclick = playPreventive;
 btn3.onclick = playIrm;
