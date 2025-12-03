@@ -5,88 +5,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Mini-jeu Radiologie — Pixel</title>
-
-<style>
-/* ---- STYLE GÉNÉRAL IDENTIQUE À TA VERSION ---- */
-
-:root{
-  --bg:#0f1724;
-  --card:#0b1220;
-  --accent:#6ee7b7;
-  --muted:#94a3b8;
-  --glass: rgba(255,255,255,0.04);
-  font-family: Inter, system-ui, -apple-system, Roboto;
-}
-html,body{margin:0;height:100%;background:#071126;color:white}
-.app{height:100%;display:flex;justify-content:center;align-items:center;padding:30px}
-.container{display:grid;grid-template-columns:250px 1fr 350px;width:100%;max-width:1100px;background:rgba(255,255,255,0.03);border-radius:12px;overflow:hidden}
-
-/* PANEL GAUCHE */
-.left{padding:22px;border-right:1px solid rgba(255,255,255,0.05)}
-.btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:12px;border-radius:10px;margin:10px 0;color:var(--accent);cursor:pointer;transition:0.2s}
-.btn:hover{transform:translateY(-3px)}
-
-/* CENTRE */
-.center{display:flex;justify-content:center;align-items:center;padding:20px}
-.stage{
-  width:420px;height:420px;
-  background:#081728;border-radius:12px;
-  position:relative;overflow:hidden;
-  border:1px solid rgba(255,255,255,0.05);
-}
-
-/* ---- SPRITES PIXEL ART ---- */
-.pixel {
-  width: 80px;
-  height: 80px;
-  position: absolute;
-  image-rendering: pixelated;
-}
-
-/* Patient centré */
-#patient {
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-/* Docteurs cachés au départ */
-.doc { top: 55%; opacity: 0; }
-#doc1 { left: -120px; }
-#doc2 { right: -120px; }
-
-/* IRM */
-#irm {
-  left:50%; top:50%;
-  transform:translate(-50%,-50%) scale(1.2);
-  opacity:0;
-}
-
-/* Fumée */
-#smoke {
-  width:180px; height:180px;
-  left:50%; top:50%;
-  transform:translate(-50%,-50%);
-  opacity:0;
-}
-
-/* ---- ANIMATIONS ---- */
-@keyframes doc-enter-left { to { left:150px; opacity:1; } }
-@keyframes doc-enter-right { to { right:150px; opacity:1; } }
-
-@keyframes smoke-burst {
-  0% { opacity:0; transform:translate(-50%,-50%) scale(.3); }
-  40% { opacity:1; }
-  100% { opacity:0; transform:translate(-50%,-50%) scale(1.5); }
-}
-
-@keyframes patient-slide-irm {
-  to { transform:translate(-50%,-20%) scale(.9); opacity:.2; }
-}
-
-.right{padding:22px;border-left:1px solid rgba(255,255,255,0.05)}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
-
 
 <body>
 <div class="app">
@@ -95,102 +15,54 @@ html,body{margin:0;height:100%;background:#071126;color:white}
   <!-- PANEL GAUCHE -->
   <div class="left">
     <h2>Actions</h2>
-    <button class="btn" id="btn1">Méthode curative</button>
-    <button class="btn" id="btn2">Méthode préventive</button>
-    <button class="btn" id="btn3">IRM</button>
+    <button class="btn" id="btn1" disabled>Méthode curative</button>
+    <button class="btn" id="btn2" disabled>Méthode préventive</button>
+    <button class="btn" id="btn3" disabled>IRM</button>
   </div>
 
   <!-- CENTRE -->
   <div class="center">
     <div class="stage">
+      <!-- Message de début -->
+      <div id="startMessage" class="message-overlay">
+        <div class="message-box">
+          <h2>🏥 Mission médicale</h2>
+          <p>Vous êtes médecin, soignez le patient.</p>
+          <button class="btn-start" id="btnStart">Commencer</button>
+        </div>
+      </div>
+
+      <!-- Message de fin -->
+      <div id="endMessage" class="message-overlay hidden">
+        <div class="message-box success">
+          <h2>✨ Félicitations !</h2>
+          <p>Le patient est sauvé.</p>
+          <button class="btn-restart" id="btnRestart">Recommencer</button>
+        </div>
+      </div>
 
       <img id="patient" class="pixel" src="sprites/patient.png">
       <img id="doc1" class="pixel doc" src="sprites/doctor1.png">
       <img id="doc2" class="pixel doc" src="sprites/doctor2.png">
       <img id="irm" class="pixel" src="sprites/irm.png">
       <img id="smoke" class="pixel" src="sprites/smoke.png">
-
     </div>
   </div>
 
   <!-- PANEL DROIT -->
   <div class="right">
     <h3>Informations</h3>
-    <p id="info">Choisissez une action.</p>
+    <div class="info" id="info">
+      <p>Prêt à commencer votre mission médicale.</p>
+    </div>
+    <div class="progress-box">
+      <p class="progress-text">Étapes complétées : <span id="progress">0/3</span></p>
+    </div>
   </div>
 
 </div>
 </div>
 
-
-<script>
-/* ==== JAVASCRIPT DES ANIMATIONS ==== */
-
-const patient = document.getElementById("patient");
-const doc1 = document.getElementById("doc1");
-const doc2 = document.getElementById("doc2");
-const irm = document.getElementById("irm");
-const smoke = document.getElementById("smoke");
-const info = document.getElementById("info");
-
-function resetScene(){
-  doc1.style.opacity = 0;
-  doc2.style.opacity = 0;
-  irm.style.opacity = 0;
-  smoke.style.opacity = 0;
-
-  doc1.style.left = "-120px";
-  doc2.style.right = "-120px";
-  patient.style.opacity = 1;
-  patient.style.transform = "translate(-50%, -50%)";
-}
-
-/* CURATIVE */
-function playCurative(){
-  resetScene();
-  info.textContent = "Méthode curative : intervention directe.";
-
-  doc1.style.animation = "doc-enter-left .8s forwards";
-  doc2.style.animation = "doc-enter-right .8s forwards";
-
-  setTimeout(()=>{ smoke.style.animation = "smoke-burst 1s forwards"; },900);
-  setTimeout(resetScene, 1800);
-}
-
-/* PRÉVENTIVE */
-function playPreventive(){
-  resetScene();
-  info.textContent = "Méthode préventive : réduire les risques.";
-
-  doc1.style.animation = "doc-enter-left .8s forwards";
-
-  setTimeout(()=>{ smoke.style.animation = "smoke-burst 1s forwards"; },900);
-  setTimeout(resetScene, 1800);
-}
-
-/* IRM */
-function playIrm(){
-  resetScene();
-  info.textContent = "IRM : imagerie médicale.";
-
-  irm.style.opacity = 1;
-
-  setTimeout(()=>{
-    patient.style.animation = "patient-slide-irm 1.2s forwards";
-  },300);
-
-  setTimeout(()=>{
-    smoke.style.animation = "smoke-burst 1s forwards";
-  },1500);
-
-  setTimeout(resetScene, 2500);
-}
-
-document.getElementById("btn1").onclick = playCurative;
-document.getElementById("btn2").onclick = playPreventive;
-document.getElementById("btn3").onclick = playIrm;
-
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
