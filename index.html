@@ -9,58 +9,62 @@
 </head>
 
 <body>
-<div class="app">
-<div class="container">
 
-  <!-- PANEL GAUCHE -->
-  <div class="left">
-    <h2>Actions</h2>
-    <button class="btn" id="btn1" disabled>Méthode curative</button>
-    <button class="btn" id="btn2" disabled>Méthode préventive</button>
-    <button class="btn" id="btn3" disabled>IRM</button>
+<!-- PAGE DE DÉBUT -->
+<div id="startPage" class="full-page">
+  <div class="page-content">
+    <h1 class="main-title">🏥 Mission Médicale</h1>
+    <p class="subtitle">Vous êtes médecin, soignez le patient.</p>
+    <button class="btn-main" id="btnStart">Commencer</button>
   </div>
-
-  <!-- CENTRE -->
-  <div class="center">
-    <div class="stage">
-      <!-- Message de début -->
-      <div id="startMessage" class="message-overlay">
-        <div class="message-box">
-          <h2>🏥 Mission médicale</h2>
-          <p>Vous êtes médecin, soignez le patient.</p>
-          <button class="btn-start" id="btnStart">Commencer</button>
-        </div>
-      </div>
-
-      <!-- Message de fin -->
-      <div id="endMessage" class="message-overlay hidden">
-        <div class="message-box success">
-          <h2>✨ Félicitations !</h2>
-          <p>Le patient est sauvé.</p>
-          <button class="btn-restart" id="btnRestart">Recommencer</button>
-        </div>
-      </div>
-
-      <img id="patient" class="pixel" src="sprites/patient.png">
-      <img id="doc1" class="pixel doc" src="sprites/doctor1.png">
-      <img id="doc2" class="pixel doc" src="sprites/doctor2.png">
-      <img id="irm" class="pixel" src="sprites/irm.png">
-      <img id="smoke" class="pixel" src="sprites/smoke.png">
-    </div>
-  </div>
-
-  <!-- PANEL DROIT -->
-  <div class="right">
-    <h3>Informations</h3>
-    <div class="info" id="info">
-      <p>Prêt à commencer votre mission médicale.</p>
-    </div>
-    <div class="progress-box">
-      <p class="progress-text">Étapes complétées : <span id="progress">0/3</span></p>
-    </div>
-  </div>
-
 </div>
+
+<!-- PAGE DU JEU -->
+<div id="gamePage" class="full-page hidden">
+  <div class="app">
+    <div class="container">
+
+      <!-- PANEL GAUCHE -->
+      <div class="left">
+        <h2>Actions</h2>
+        <button class="btn" id="btn1">Méthode curative</button>
+        <button class="btn" id="btn2">Méthode préventive</button>
+        <button class="btn" id="btn3">IRM</button>
+      </div>
+
+      <!-- CENTRE -->
+      <div class="center">
+        <div class="stage">
+          <img id="patient" class="pixel" src="sprites/patient.png">
+          <img id="doc1" class="pixel doc" src="sprites/doctor1.png">
+          <img id="doc2" class="pixel doc" src="sprites/doctor2.png">
+          <img id="irm" class="pixel" src="sprites/irm.png">
+          <img id="smoke" class="pixel" src="sprites/smoke.png">
+        </div>
+      </div>
+
+      <!-- PANEL DROIT -->
+      <div class="right">
+        <h3>Informations</h3>
+        <div class="info" id="info">
+          <p>Choisissez une action pour soigner le patient.</p>
+        </div>
+        <div class="progress-box">
+          <p class="progress-text">Étapes complétées : <span id="progress">0/3</span></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- PAGE DE FIN -->
+<div id="endPage" class="full-page hidden">
+  <div class="page-content">
+    <h1 class="main-title success">✨ Félicitations !</h1>
+    <p class="subtitle">Le patient est sauvé.</p>
+    <button class="btn-main" id="btnRestart">Recommencer</button>
+  </div>
 </div>
 
 <script src="script.js"></script>
