@@ -24,11 +24,12 @@ let completedActions = new Set();
 
 // Textes explicatifs pour Terminale ES
 const explanationTexts = {
-  curative: `<p><strong>Méthode curative</strong></p><p>Cette approche consiste à traiter une maladie déjà présente. En économie de la santé, elle représente un coût direct pour le système de santé. Les dépenses curatives constituent la majorité des budgets hospitaliers, avec des interventions chirurgicales, des traitements médicamenteux et un suivi post-opératoire.</p><p>Cette méthode privilégie l'efficacité immédiate mais peut s'avérer coûteuse à long terme pour la collectivité.</p>`,
+  curative: `<p><strong>Méthode curative</strong></p><p> La radiothérapie utilise des rayonnements ionisants pour détruire les cellules cancéreuses. Les faisceaux de rayons X ou gamma sont concentrés précisément sur la tumeur pour limiter les dommages aux tissus sains environnants. Cette technique curative complète souvent la chirurgie et la chimiothérapie dans le traitement du cancer.</p>`,
   
-  preventive: `<p><strong>Méthode préventive</strong></p><p>Cette stratégie vise à éviter l'apparition de maladies par des actions anticipées : vaccinations, dépistages, sensibilisation aux comportements à risque.</p><p>Économiquement, la prévention réduit les coûts futurs de santé et améliore la productivité sociale. Selon l'OMS, 1€ investi en prévention peut économiser jusqu'à 14€ en soins curatifs. C'est un investissement rentable pour la collectivité malgré des résultats parfois différés dans le temps.</p>`,
+  preventive: `<p><strong>Méthode préventive</strong></p><p>La radioprotection est essentielle en radiologie. Les professionnels portent des tabliers de plomb et utilisent le principe ALARA (As Low As Reasonably Achievable) pour minimiser l'exposition aux rayonnements. Les examens sont justifiés médicalement avant réalisation. Des dosimètres mesurent les doses reçues par le personnel médical pour garantir leur sécurité à long terme.</p>`,
   
-  irm: `<p><strong>IRM (Imagerie par Résonance Magnétique)</strong></p><p>Technologie médicale de diagnostic permettant de visualiser l'intérieur du corps sans intervention chirurgicale. L'acquisition d'un appareil IRM représente un investissement majeur pour un hôpital (entre 1 et 3 millions d'euros).</p><p>Cependant, elle améliore considérablement la qualité diagnostique et réduit les interventions exploratoires inutiles. C'est un exemple d'investissement en capital médical qui optimise les ressources à moyen terme.</p>`
+  irm: `<p><strong>IRM (Imagerie par Résonance Magnétique)</strong></p><p>L'IRM (Imagerie par Résonance Magnétique)
+L'IRM utilise un champ magnétique puissant et des ondes radio pour créer des images détaillées du corps humain. Contrairement aux rayons X, cette technique n'emploie pas de rayonnements ionisants, ce qui la rend plus sûre. L'IRM permet d'observer les tissus mous comme le cerveau, les muscles ou les organes internes avec une grande précision diagnostique.</p>`
 };
 
 // === NAVIGATION ENTRE LES PAGES ===
